@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --gold: 43 76% 56%;
+    --beige: 60 33% 93%;
+    --rose: 0 30% 78%;
+  }
+
+  * {
+    @apply border-gray-800;
+  }
+
+  body {
+    @apply bg-black text-white antialiased;
+    background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #000000 100%);
+    min-height: 100vh;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  }
+
+  .glass-dark {
+    @apply bg-black/50 backdrop-blur-xl border border-white/5;
+  }
+
+  .luxury-shadow {
+    box-shadow: 
+      0 0 20px rgba(212, 175, 55, 0.1),
+      0 0 40px rgba(212, 175, 55, 0.05),
+      0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  .glow-gold {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+  }
+
+  .glow-gold-intense {
+    box-shadow: 
+      0 0 20px rgba(212, 175, 55, 0.4),
+      0 0 40px rgba(212, 175, 55, 0.2);
+  }
+
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #d4af37 0%, #f5e6a3 50%, #d4af37 100%);
+  }
+
+  .border-gradient-gold {
+    border-image: linear-gradient(135deg, #d4af37, #f5e6a3, #d4af37) 1;
+  }
+
+  .shimmer {
+    @apply relative overflow-hidden;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(212, 175, 55, 0.1) 50%,
+      transparent 100%
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 2s linear infinite;
+  }
+
+  .silk-overlay {
+    background: linear-gradient(
+      135deg,
+      rgba(212, 175, 55, 0.05) 0%,
+      transparent 50%,
+      rgba(212, 175, 55, 0.05) 100%
+    );
+  }
+}
+
+/* Premium scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #d4af37, #b8860b);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #f5e6a3, #d4af37);
+}
+
+/* Selection */
+::selection {
+  background: rgba(212, 175, 55, 0.3);
+  color: #ffffff;
+}
