@@ -398,7 +398,7 @@ export default function AdminCmsEditorPage({
       const slides = ensureArray<any>(data.slides, [])
       return (
         <div className="space-y-5">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {renderTextField(
               section.id,
               'Auto Slide (ms)',
@@ -506,7 +506,7 @@ export default function AdminCmsEditorPage({
                       </div>
                     </div>
 
-                    <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                    <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
                       {renderTextField(section.id, 'Eyebrow', slide.eyebrow ?? '', (next) =>
                         updateSectionData(section.id, (current) => {
                           const nextSlides = [...ensureArray<any>(current.slides, [])]
@@ -590,7 +590,7 @@ export default function AdminCmsEditorPage({
       const items = ensureArray<any>(data.items, [])
       return (
         <div className="space-y-5">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {renderTextField(section.id, 'Eyebrow', data.eyebrow ?? '', (next) =>
               updateSectionData(section.id, (current) => ({ ...current, eyebrow: next }))
             )}
@@ -700,7 +700,7 @@ export default function AdminCmsEditorPage({
 
       return (
         <div className="space-y-6">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {renderTextField(section.id, 'Eyebrow', data.eyebrow ?? '', (next) =>
               updateSectionData(section.id, (current) => ({ ...current, eyebrow: next }))
             )}
@@ -987,7 +987,7 @@ export default function AdminCmsEditorPage({
 
       return (
         <div className="space-y-6">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {renderTextField(section.id, 'Eyebrow', data.eyebrow ?? '', (next) =>
               updateSectionData(section.id, (current) => ({ ...current, eyebrow: next }))
             )}
@@ -1125,7 +1125,7 @@ export default function AdminCmsEditorPage({
       const items = ensureArray<any>(data.items, [])
       return (
         <div className="space-y-6">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {renderTextField(section.id, 'Eyebrow', data.eyebrow ?? '', (next) =>
               updateSectionData(section.id, (current) => ({ ...current, eyebrow: next }))
             )}
@@ -1232,7 +1232,7 @@ export default function AdminCmsEditorPage({
       const items = ensureArray<any>(data.items, [])
       return (
         <div className="space-y-6">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {renderTextField(section.id, 'Eyebrow', data.eyebrow ?? '', (next) =>
               updateSectionData(section.id, (current) => ({ ...current, eyebrow: next }))
             )}
@@ -1333,7 +1333,7 @@ export default function AdminCmsEditorPage({
       const brands = ensureArray<string>(data.brands, [])
       return (
         <div className="space-y-6">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {renderTextField(section.id, 'Eyebrow', data.eyebrow ?? '', (next) =>
               updateSectionData(section.id, (current) => ({ ...current, eyebrow: next }))
             )}
@@ -1428,7 +1428,7 @@ export default function AdminCmsEditorPage({
       const items = ensureArray<any>(data.items, [])
       return (
         <div className="space-y-6">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {renderTextField(section.id, 'Eyebrow', data.eyebrow ?? '', (next) =>
               updateSectionData(section.id, (current) => ({ ...current, eyebrow: next }))
             )}
@@ -1505,7 +1505,7 @@ export default function AdminCmsEditorPage({
       const items = ensureArray<any>(data.items, [])
       return (
         <div className="space-y-6">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {renderTextField(section.id, 'Eyebrow', data.eyebrow ?? '', (next) =>
               updateSectionData(section.id, (current) => ({ ...current, eyebrow: next }))
             )}
@@ -1635,7 +1635,7 @@ export default function AdminCmsEditorPage({
       const images = ensureArray<any>(data.images, [])
       return (
         <div className="space-y-6">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {renderTextField(section.id, 'Eyebrow', data.eyebrow ?? '', (next) =>
               updateSectionData(section.id, (current) => ({ ...current, eyebrow: next }))
             )}
@@ -1720,7 +1720,7 @@ export default function AdminCmsEditorPage({
     if (section.type === 'brands.hero' || section.type === 'about.hero') {
       return (
         <div className="space-y-5">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {renderTextField(section.id, 'Badge', data.badge ?? '', (next) =>
               updateSectionData(section.id, (current) => ({ ...current, badge: next }))
             )}
@@ -1753,7 +1753,7 @@ export default function AdminCmsEditorPage({
           </div>
 
           {section.type === 'brands.hero' ? (
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {renderTextField(section.id, 'Side Card Eyebrow', data.sideCardEyebrow ?? '', (next) =>
                 updateSectionData(section.id, (current) => ({ ...current, sideCardEyebrow: next }))
               )}
@@ -1762,7 +1762,7 @@ export default function AdminCmsEditorPage({
               )}
             </div>
           ) : (
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {renderTextField(section.id, 'Hero Image Alt', data.heroImageAlt ?? '', (next) =>
                 updateSectionData(section.id, (current) => ({ ...current, heroImageAlt: next }))
               )}
@@ -1879,7 +1879,7 @@ export default function AdminCmsEditorPage({
       const items = ensureArray<any>(data.items, [])
       return (
         <div className="space-y-5">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {renderTextField(section.id, 'Eyebrow', data.eyebrow ?? '', (next) =>
               updateSectionData(section.id, (current) => ({ ...current, eyebrow: next }))
             )}
@@ -2002,7 +2002,7 @@ export default function AdminCmsEditorPage({
       const paragraphs = ensureArray<string>(data.paragraphs, [])
       return (
         <div className="space-y-5">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {renderTextField(section.id, 'Eyebrow', data.eyebrow ?? '', (next) =>
               updateSectionData(section.id, (current) => ({ ...current, eyebrow: next }))
             )}
@@ -2087,7 +2087,7 @@ export default function AdminCmsEditorPage({
       const items = ensureArray<any>(data.items, [])
       return (
         <div className="space-y-5">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {renderTextField(section.id, 'Eyebrow', data.eyebrow ?? '', (next) =>
               updateSectionData(section.id, (current) => ({ ...current, eyebrow: next }))
             )}
@@ -2165,7 +2165,7 @@ export default function AdminCmsEditorPage({
     if (section.type === 'about.cta') {
       return (
         <div className="space-y-5">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {renderTextField(section.id, 'Title', data.title ?? '', (next) =>
               updateSectionData(section.id, (current) => ({ ...current, title: next }))
             )}
@@ -2221,7 +2221,7 @@ export default function AdminCmsEditorPage({
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-6">
           <AdminPanel
             title="Sections"

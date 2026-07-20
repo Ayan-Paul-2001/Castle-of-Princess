@@ -53,7 +53,7 @@ export default function AdminBannersPage() {
         description="Control homepage, sale, and category promotional blocks from one place."
       />
 
-      <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[0.9fr_1.1fr]">
         <AdminPanel title="Create Banner" description="Draft a promotional message and assign its placement.">
           <form onSubmit={handleCreateBanner} className="space-y-4">
             <input

@@ -34,7 +34,7 @@ export default function AdminCmsIndexPage() {
       />
 
       <AdminPanel title="Pages" description="Choose a page to edit and publish changes.">
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
           {cmsPages.map((page, index) => (
             <motion.div
               key={page.key}

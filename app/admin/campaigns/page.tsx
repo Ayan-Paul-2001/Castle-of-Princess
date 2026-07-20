@@ -106,7 +106,7 @@ export default function AdminCampaignsPage() {
         description="Control the promo popup and highlight products for the storefront."
       />
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <AdminPanel
           title="Promotional Popup"
           description="Enable a storefront popup for announcements and limited-time offers."

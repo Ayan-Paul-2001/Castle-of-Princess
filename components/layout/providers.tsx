@@ -233,10 +233,14 @@ function StoreDbSync() {
   useEffect(() => {
     fetch('/api/sync')
       .then((res) => {
-        if (!res.ok) throw new Error()
+        if (!res.ok) {
+          console.warn('Unable to sync local storage with MongoDB (API returned non-OK status). Using local defaults.')
+          return null
+        }
         return res.json()
       })
       .then((dbData) => {
+        if (!dbData) return
         const keysToSync = [
           { dbKey: 'products', storageKey: 'cop_products' },
           { dbKey: 'categories', storageKey: 'cop_categories' },

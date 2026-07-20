@@ -96,7 +96,7 @@ export default function WishlistPage() {
             </Link>
           </motion.div>
         ) : (
-          <div className="mt-10 grid gap-6 lg:grid-cols-2">
+          <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-2">
             {items.map((item, index) => (
               <motion.div
                 key={item.productId}

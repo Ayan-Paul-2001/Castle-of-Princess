@@ -173,7 +173,7 @@ export default function AdminCategoriesPage() {
         description="Create and maintain shop categories and brands used across discovery and navigation."
       />
 
-      <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[0.9fr_1.1fr]">
         <AdminPanel
           title={editingId ? 'Edit Category' : 'Add Category'}
           description={
@@ -366,7 +366,7 @@ export default function AdminCategoriesPage() {
         <p className="mt-2 text-sm text-gray-400">Add, edit, or delete brands sold on the storefront.</p>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[0.9fr_1.1fr]">
         <AdminPanel
           title={editingBrand ? 'Edit Brand' : 'Add Brand'}
           description={

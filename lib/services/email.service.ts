@@ -118,7 +118,7 @@ export async function sendOrderConfirmationEmail(
           
           <div style="background: rgba(0, 0, 0, 0.3); padding: 30px; text-align: center;">
             <p style="margin: 0; color: #a0a0a0; font-size: 14px;">
-              © 2024 Castle of Princess. All rights reserved.
+              © 2026 Castle of Princess. All rights reserved.
             </p>
           </div>
         </div>
@@ -173,7 +173,7 @@ export async function sendVerificationCodeEmail(email: string, code: string) {
           
           <div style="background: rgba(0, 0, 0, 0.3); padding: 30px; text-align: center;">
             <p style="margin: 0; color: #a0a0a0; font-size: 14px;">
-              © 2024 Castle of Princess. All rights reserved.
+              © 2026 Castle of Princess. All rights reserved.
             </p>
           </div>
         </div>

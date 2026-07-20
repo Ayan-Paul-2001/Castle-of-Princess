@@ -538,9 +538,9 @@ export default function AdminProductsPage() {
         ))}
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)] 2xl:grid-cols-[320px_minmax(0,1fr)_340px]">
-        <aside className="space-y-6 xl:sticky xl:top-8 xl:self-start">
-          <section className="glass rounded-[2rem] p-5">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[320px_minmax(0,1fr)] 2xl:grid-cols-[320px_minmax(0,1fr)_340px]">
+        <aside className="flex flex-col gap-6 xl:sticky xl:top-8 xl:self-start order-last xl:order-none">
+          <section className="glass rounded-[2rem] p-5 order-2 xl:order-none">
             <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-5">
               <div>
                 <p className="text-xs uppercase tracking-[0.28em] text-gold/70">Catalog Rail</p>
@@ -662,7 +662,7 @@ export default function AdminProductsPage() {
             </div>
           </section>
 
-          <section className="glass rounded-[2rem] p-5">
+          <section className="glass rounded-[2rem] p-5 order-1 xl:order-none">
             <p className="text-xs uppercase tracking-[0.28em] text-gold/70">Current Focus</p>
             <h3 className="mt-3 text-xl font-semibold text-white">
               {draft.name || 'Untitled Product'}
@@ -694,7 +694,7 @@ export default function AdminProductsPage() {
           </section>
         </aside>
 
-        <div className="min-w-0 space-y-6">
+        <div className="min-w-0 space-y-6 order-first xl:order-none">
           <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(212,175,55,0.16),rgba(255,255,255,0.04)_35%,rgba(0,0,0,0.32)_100%)] p-6">
             <div className="grid gap-6 grid-cols-1 md:grid-cols-[240px_1fr]">
               <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-black/30">

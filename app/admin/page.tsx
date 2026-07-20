@@ -296,7 +296,7 @@ export default function AdminDashboard() {
         })}
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <AdminPanel
           title="Revenue Overview"
           description="Visual analysis of store sales income by day, month, or year."
@@ -318,7 +318,7 @@ export default function AdminDashboard() {
             </div>
           }
         >
-          <div className="h-[300px] w-full mt-4">
+          <div className="relative h-[300px] w-full mt-4 min-w-0 overflow-hidden">
             {isLoaded ? (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
@@ -393,7 +393,7 @@ export default function AdminDashboard() {
         </AdminPanel>
       </div>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1.5fr_0.9fr]">
+      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1.5fr_0.9fr]">
         <AdminPanel
           title="Recent Orders"
           description="Latest customer orders that need attention from the operations team."

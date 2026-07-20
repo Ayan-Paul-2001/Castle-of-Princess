@@ -64,7 +64,7 @@ export default function AdminOrderDetailsPage({
         }
       />
 
-      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <AdminPanel title="Order Summary">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">

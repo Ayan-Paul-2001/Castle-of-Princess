@@ -53,18 +53,20 @@ async function seed() {
 
   const User = mongoose.models.User || mongoose.model('User', userSchema);
 
+  const adminEmail = env.DEFAULT_ADMIN_EMAIL;
+  const adminPassword = env.DEFAULT_ADMIN_PASSWORD;
+  const adminName = env.DEFAULT_ADMIN_NAME || 'Castle of Princes Admin';
+
+  if (!adminEmail || !adminPassword) {
+    console.error('DEFAULT_ADMIN_EMAIL or DEFAULT_ADMIN_PASSWORD not set in env file.');
+    process.exit(1);
+  }
+
   const adminsToSeed = [
     {
-      email: 'admin@castle.local',
-      password: 'admin12345',
-      name: 'Development Admin',
-      role: 'admin',
-      isVerified: true
-    },
-    {
-      email: 'castleofprinces@gmail.com',
-      password: 'Admin@owner',
-      name: 'Castle of Princes Admin',
+      email: adminEmail,
+      password: adminPassword,
+      name: adminName,
       role: 'admin',
       isVerified: true
     }
