@@ -195,7 +195,7 @@ export default function AdminBlogPage() {
             No posts found.
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-white/10">
+          <div className="overflow-hidden rounded-2xl border border-white/10">
             <table className="w-full text-left text-sm">
               <thead className="bg-white/[0.03] text-xs uppercase tracking-[0.22em] text-gray-500">
                 <tr>

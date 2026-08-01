@@ -22,8 +22,9 @@ export interface MockProduct {
   description: string
   shortDescription: string
   ingredients: string
-  howToUse: string
+  howToUse?: string
   tags: string[]
+  visibilityFlags?: string[]
 }
 
 export const mockProducts: MockProduct[] = [

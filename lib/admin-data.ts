@@ -40,6 +40,7 @@ export type AdminProduct = {
   featured: boolean
   trending: boolean
   onSale: boolean
+  visibilityFlags?: string[]
   seo: {
     title: string
     description: string

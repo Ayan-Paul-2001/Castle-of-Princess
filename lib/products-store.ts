@@ -122,6 +122,7 @@ export function mapAdminToMock(prod: AdminProduct): MockProduct {
     ingredients: prod.ingredients || '',
     howToUse: prod.howToUse || '',
     tags: prod.tags,
+    visibilityFlags: prod.visibilityFlags || prod.tags || [],
   }
 }
 

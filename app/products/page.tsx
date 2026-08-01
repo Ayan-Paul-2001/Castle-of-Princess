@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Search, SlidersHorizontal, ChevronDown } from 'lucide-react'
+import { Search, SlidersHorizontal, ChevronDown, Sparkles } from 'lucide-react'
 import ProductCard from '@/components/products/product-card'
 import { Button } from '@/components/ui/button'
 import { mockProducts, type MockProduct } from '@/lib/products-mock'
@@ -83,10 +83,12 @@ function ProductsPageInner() {
   const searchFromQuery = searchParams.get('search')
   const sortFromQuery = searchParams.get('sort')
   const featuredFromQuery = searchParams.get('featured')
+  const flagFromQuery = searchParams.get('flag') || searchParams.get('tag')
   const initialConcernFilters = parseConcernFilters(concernFromQuery)
 
   const [products, setProducts] = useState<MockProduct[]>(mockProducts)
   const [search, setSearch] = useState(searchFromQuery || '')
+  const [selectedFlag, setSelectedFlag] = useState<string | null>(flagFromQuery)
   const [isSearchedFromHeader, setIsSearchedFromHeader] = useState(!!searchFromQuery)
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     categoryFromQuery ? [categoryFromQuery] : []
@@ -146,12 +148,14 @@ function ProductsPageInner() {
   useEffect(() => {
     const concernFilters = parseConcernFilters(searchParams.get('concern'))
     const searchParam = searchParams.get('search')
+    const flagParam = searchParams.get('flag') || searchParams.get('tag')
     setSearch(searchParam || '')
     setIsSearchedFromHeader(!!searchParam)
     setSelectedCategories(searchParams.get('category') ? [searchParams.get('category') as string] : [])
     setSelectedBrands(searchParams.get('brand') ? [searchParams.get('brand') as string] : [])
     setSelectedSkinTypes(concernFilters.skinTypes)
     setSelectedConcerns(concernFilters.concerns)
+    setSelectedFlag(flagParam)
     setSortBy(searchParams.get('sort') || 'featured')
     setFeaturedOnly(searchParams.get('featured') === 'true')
   }, [searchParams])
@@ -189,6 +193,7 @@ function ProductsPageInner() {
     setSelectedBrands([])
     setSelectedSkinTypes([])
     setSelectedConcerns([])
+    setSelectedFlag(null)
     setPriceRange([0, 10000])
     setSortBy('featured')
     setFeaturedOnly(false)
@@ -240,6 +245,14 @@ function ProductsPageInner() {
 
       const matchesFeatured = !featuredOnly || product.featured
 
+      const matchesFlag = !selectedFlag || (
+        (product.visibilityFlags && product.visibilityFlags.some(f => f.toLowerCase().trim() === selectedFlag.toLowerCase().trim())) ||
+        (product.tags && product.tags.some(t => t.toLowerCase().trim() === selectedFlag.toLowerCase().trim())) ||
+        (selectedFlag.toLowerCase().includes('featured') && product.featured) ||
+        (selectedFlag.toLowerCase().includes('trend') && product.trending) ||
+        (selectedFlag.toLowerCase().includes('sale') && product.onSale)
+      )
+
       return (
         matchesSearch &&
         matchesCategory &&
@@ -247,7 +260,8 @@ function ProductsPageInner() {
         matchesSkinType &&
         matchesConcern &&
         matchesPrice &&
-        matchesFeatured
+        matchesFeatured &&
+        matchesFlag
       )
     })
 
@@ -292,6 +306,8 @@ function ProductsPageInner() {
     selectedCategories,
     selectedConcerns,
     selectedSkinTypes,
+    selectedFlag,
+    categoryLabels,
     sortBy,
   ])
 
@@ -326,6 +342,28 @@ function ProductsPageInner() {
                 : 'Discover premium Korean skincare products for your daily routine'}
           </p>
         </div>
+
+        {selectedFlag && (
+          <div className="mb-8 flex items-center justify-between rounded-2xl border border-gold/40 bg-gold/10 p-4 sm:px-6 backdrop-blur-md shadow-[0_0_30px_rgba(212,175,55,0.15)] animate-in fade-in duration-300">
+            <div className="flex items-center gap-3">
+              <Sparkles className="h-6 w-6 text-gold shrink-0" />
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.25em] text-gold/80 font-semibold">
+                  Filtered by Visibility Flag
+                </p>
+                <p className="text-lg font-bold text-white font-playfair">{selectedFlag}</p>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedFlag(null)}
+              className="rounded-full border-gold/30 text-gold hover:bg-gold/20"
+            >
+              Clear Flag ×
+            </Button>
+          </div>
+        )}
 
         {/* Search & Filter Bar */}
         <div className="mb-8">

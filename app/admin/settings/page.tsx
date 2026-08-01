@@ -135,7 +135,7 @@ export default function AdminSettingsPage() {
         description="Manage store identity, contact details, payments, shipping thresholds, and brand messaging."
       />
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div className="grid gap-6 xl:grid-cols-2">
         <AdminPanel title="Store Settings" description="Core operational details used across orders and support.">
           <div className="grid gap-4 md:grid-cols-2">
             <input

@@ -6,11 +6,19 @@ import {
   ChevronDown,
   Copy,
   ImagePlus,
+  Pencil,
   Plus,
   Search,
   Sparkles,
   Trash2,
 } from 'lucide-react'
+import {
+  getVisibilityFlags,
+  addVisibilityFlag,
+  updateVisibilityFlag,
+  deleteVisibilityFlag,
+  type VisibilityFlag,
+} from '@/lib/visibility-flags-store'
 import AdminPageHeader from '@/components/admin/admin-page-header'
 import { Button } from '@/components/ui/button'
 import { type AdminProduct } from '@/lib/admin-data'
@@ -54,6 +62,7 @@ const createBlankProduct = (): ProductEditorState => ({
   featured: false,
   trending: false,
   onSale: false,
+  visibilityFlags: [],
   seo: {
     title: '',
     description: '',
@@ -90,6 +99,11 @@ export default function AdminProductsPage() {
   const [pendingCategoryToCreate, setPendingCategoryToCreate] = useState<string | null>(null)
   const [existingBrands, setExistingBrands] = useState<string[]>([])
   const [pendingBrandToCreate, setPendingBrandToCreate] = useState<string | null>(null)
+  const [visibilityFlagsList, setVisibilityFlagsList] = useState<VisibilityFlag[]>([])
+  const [isFlagModalOpen, setIsFlagModalOpen] = useState(false)
+  const [editingFlag, setEditingFlag] = useState<VisibilityFlag | null>(null)
+  const [flagNameInput, setFlagNameInput] = useState('')
+  const [flagDescInput, setFlagDescInput] = useState('')
 
   useEffect(() => {
     setIsMounted(true)
@@ -99,6 +113,7 @@ export default function AdminProductsPage() {
       setProducts(prods)
       setExistingCategories(getAdminCategories())
       setExistingBrands(getAdminBrands())
+      setVisibilityFlagsList(getVisibilityFlags())
       const first = prods[0]
       if (first) {
         setSelectedId(first.id)
@@ -121,6 +136,9 @@ export default function AdminProductsPage() {
     loadLocalData()
 
     window.addEventListener('cop:syncComplete', loadLocalData)
+    window.addEventListener('cop:visibilityFlagsUpdated', () => {
+      setVisibilityFlagsList(getVisibilityFlags())
+    })
     return () => {
       window.removeEventListener('cop:syncComplete', loadLocalData)
     }
@@ -538,9 +556,9 @@ export default function AdminProductsPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[320px_minmax(0,1fr)] 2xl:grid-cols-[320px_minmax(0,1fr)_340px]">
-        <aside className="flex flex-col gap-6 xl:sticky xl:top-8 xl:self-start order-last xl:order-none">
-          <section className="glass rounded-[2rem] p-5 order-2 xl:order-none">
+      <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)] 2xl:grid-cols-[320px_minmax(0,1fr)_340px]">
+        <aside className="space-y-6 xl:sticky xl:top-8 xl:self-start">
+          <section className="glass rounded-[2rem] p-5">
             <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-5">
               <div>
                 <p className="text-xs uppercase tracking-[0.28em] text-gold/70">Catalog Rail</p>
@@ -662,7 +680,7 @@ export default function AdminProductsPage() {
             </div>
           </section>
 
-          <section className="glass rounded-[2rem] p-5 order-1 xl:order-none">
+          <section className="glass rounded-[2rem] p-5">
             <p className="text-xs uppercase tracking-[0.28em] text-gold/70">Current Focus</p>
             <h3 className="mt-3 text-xl font-semibold text-white">
               {draft.name || 'Untitled Product'}
@@ -694,7 +712,7 @@ export default function AdminProductsPage() {
           </section>
         </aside>
 
-        <div className="min-w-0 space-y-6 order-first xl:order-none">
+        <div className="min-w-0 space-y-6">
           <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(212,175,55,0.16),rgba(255,255,255,0.04)_35%,rgba(0,0,0,0.32)_100%)] p-6">
             <div className="grid gap-6 grid-cols-1 md:grid-cols-[240px_1fr]">
               <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-black/30">
@@ -1463,56 +1481,121 @@ export default function AdminProductsPage() {
           </section>
 
           <section className="glass rounded-[2rem] p-6">
-            <div className="mb-5 border-b border-white/10 pb-5">
-              <p className="text-xs uppercase tracking-[0.28em] text-gold/70">
-                Merchandising
-              </p>
-              <h3 className="mt-3 text-2xl font-semibold text-white">Visibility Flags</h3>
-              <p className="mt-2 text-sm text-gray-400">
-                Control homepage placement, trend tags, and sale highlighting.
-              </p>
+            <div className="mb-5 border-b border-white/10 pb-5 flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.28em] text-gold/70">
+                  Merchandising
+                </p>
+                <h3 className="mt-2 text-2xl font-semibold text-white">Visibility Flags</h3>
+                <p className="mt-1 text-sm text-gray-400">
+                  Control placement, custom trend tags, and Luxury Gallery matching.
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setEditingFlag(null)
+                  setFlagNameInput('')
+                  setFlagDescInput('')
+                  setIsFlagModalOpen(true)
+                }}
+                className="border-gold/30 text-gold hover:bg-gold/10"
+              >
+                <Plus className="mr-1 h-4 w-4" /> Add Flag
+              </Button>
             </div>
 
             <div className="space-y-3">
-              {[
-                {
-                  key: 'featured',
-                  label: 'Featured product',
-                  description: 'Highlight this product in premium featured sections.',
-                },
-                {
-                  key: 'trending',
-                  label: 'Trending badge',
-                  description: 'Show trending status in discovery and cards.',
-                },
-                {
-                  key: 'onSale',
-                  label: 'Sale badge',
-                  description: 'Display automatic sale treatment on product cards.',
-                },
-              ].map((flag) => (
-                <button
-                  key={flag.key}
-                  type="button"
-                  onClick={() =>
-                    setDraft((current) => ({
-                      ...current,
-                      [flag.key]: !current[flag.key as keyof ProductEditorState],
-                    }))
-                  }
-                  className={`flex w-full items-start justify-between rounded-2xl border p-4 text-left transition-colors ${
-                    draft[flag.key as keyof ProductEditorState]
-                      ? 'border-gold/40 bg-gold/10'
-                      : 'border-white/10 bg-white/[0.03]'
-                  }`}
-                >
-                  <div>
-                    <p className="font-medium text-white">{flag.label}</p>
-                    <p className="mt-1 text-sm text-gray-500">{flag.description}</p>
+              {visibilityFlagsList.map((flag) => {
+                const isSelected =
+                  (draft.visibilityFlags && draft.visibilityFlags.includes(flag.name)) ||
+                  (flag.id === 'featured' && draft.featured) ||
+                  (flag.id === 'trending' && draft.trending) ||
+                  (flag.id === 'onSale' && draft.onSale)
+
+                return (
+                  <div
+                    key={flag.id}
+                    className={`flex w-full items-center justify-between rounded-2xl border p-4 transition-all ${
+                      isSelected
+                        ? 'border-gold/50 bg-gold/10 shadow-[0_0_15px_rgba(212,175,55,0.1)]'
+                        : 'border-white/10 bg-white/[0.03] hover:border-white/20'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const currentFlags = draft.visibilityFlags || []
+                        let updatedFlags: string[]
+                        if (isSelected) {
+                          updatedFlags = currentFlags.filter((f) => f !== flag.name)
+                        } else {
+                          updatedFlags = [...currentFlags, flag.name]
+                        }
+
+                        setDraft((current) => ({
+                          ...current,
+                          visibilityFlags: updatedFlags,
+                          featured: flag.id === 'featured' ? !isSelected : current.featured,
+                          trending: flag.id === 'trending' ? !isSelected : current.trending,
+                          onSale: flag.id === 'onSale' ? !isSelected : current.onSale,
+                        }))
+                      }}
+                      className="flex-1 text-left"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-white">{flag.name}</span>
+                        {isSelected && (
+                          <span className="inline-flex items-center rounded-full bg-gold/20 px-2.5 py-0.5 text-[10px] uppercase tracking-wider text-gold font-semibold">
+                            Active
+                          </span>
+                        )}
+                      </div>
+                      {flag.description && (
+                        <p className="mt-1 text-sm text-gray-400">{flag.description}</p>
+                      )}
+                    </button>
+
+                    <div className="flex items-center space-x-2 ml-4">
+                      <Sparkles className={`h-5 w-5 ${isSelected ? 'text-gold' : 'text-gray-600'}`} />
+                      {!flag.isSystem && (
+                        <div className="flex items-center space-x-1 pl-2 border-l border-white/10">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setEditingFlag(flag)
+                              setFlagNameInput(flag.name)
+                              setFlagDescInput(flag.description || '')
+                              setIsFlagModalOpen(true)
+                            }}
+                            className="p-1.5 text-gray-400 hover:text-gold transition-colors"
+                            title="Edit Flag"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              if (confirm(`Delete visibility flag "${flag.name}"?`)) {
+                                deleteVisibilityFlag(flag.id)
+                                toast.success(`Deleted flag "${flag.name}"`)
+                              }
+                            }}
+                            className="p-1.5 text-gray-400 hover:text-red-400 transition-colors"
+                            title="Delete Flag"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <Sparkles className="h-5 w-5 text-gold" />
-                </button>
-              ))}
+                )
+              })}
             </div>
           </section>
 
@@ -1691,6 +1774,79 @@ export default function AdminProductsPage() {
                 className="rounded-full"
               >
                 Confirm
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* CRUD Modal for Visibility Flags */}
+      {isFlagModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-[#0f0f0f] p-6 shadow-2xl">
+            <h3 className="font-playfair text-2xl font-semibold text-white mb-2">
+              {editingFlag ? 'Edit Visibility Flag' : 'Add New Visibility Flag'}
+            </h3>
+            <p className="text-sm text-gray-400 mb-6">
+              Visibility flags control homepage features and match items in the Luxury Beauty Gallery.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs uppercase tracking-widest text-gold/70 block mb-2 font-medium">
+                  Flag Name
+                </label>
+                <input
+                  type="text"
+                  value={flagNameInput}
+                  onChange={(e) => setFlagNameInput(e.target.value)}
+                  placeholder="e.g. Radiance Ritual, K-Beauty Mood"
+                  className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none focus:border-gold transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs uppercase tracking-widest text-gold/70 block mb-2 font-medium">
+                  Description (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={flagDescInput}
+                  onChange={(e) => setFlagDescInput(e.target.value)}
+                  placeholder="e.g. Silky textures and soft glow"
+                  className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none focus:border-gold transition-colors"
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end space-x-3">
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => setIsFlagModalOpen(false)}
+                className="rounded-full border-white/10 text-gray-300"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="gold"
+                type="button"
+                onClick={() => {
+                  if (!flagNameInput.trim()) {
+                    toast.error('Flag name is required')
+                    return
+                  }
+                  if (editingFlag) {
+                    updateVisibilityFlag(editingFlag.id, flagNameInput, flagDescInput)
+                    toast.success(`Updated flag "${flagNameInput.trim()}"`)
+                  } else {
+                    addVisibilityFlag(flagNameInput, flagDescInput)
+                    toast.success(`Added visibility flag "${flagNameInput.trim()}"`)
+                  }
+                  setIsFlagModalOpen(false)
+                }}
+                className="rounded-full"
+              >
+                {editingFlag ? 'Save Changes' : 'Create Flag'}
               </Button>
             </div>
           </div>

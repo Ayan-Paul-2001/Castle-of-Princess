@@ -1211,7 +1211,10 @@ export default function Home() {
                             transition={{ duration: 0.45, delay: index * 0.06 }}
                             className={mergedSpan}
                           >
-                            <div className="group relative h-full min-h-[240px] overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] p-[1px] transition-all duration-300 hover:border-gold/30 hover:shadow-[0_0_40px_rgba(212,175,55,0.10)]">
+                            <Link
+                              href={`/products?flag=${encodeURIComponent(item.title)}`}
+                              className="group relative block h-full min-h-[240px] overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] p-[1px] transition-all duration-300 hover:border-gold/50 hover:shadow-[0_0_40px_rgba(212,175,55,0.20)] cursor-pointer"
+                            >
                               <div className="relative h-full overflow-hidden rounded-[calc(2rem-1px)] bg-black/80">
                                 <Image
                                   src={item.image}
@@ -1221,20 +1224,25 @@ export default function Home() {
                                   sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent" />
-                                <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[linear-gradient(135deg,rgba(212,175,55,0.14),transparent_45%,rgba(255,255,255,0.06))]" />
+                                <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[linear-gradient(135deg,rgba(212,175,55,0.18),transparent_45%,rgba(255,255,255,0.06))]" />
                                 <div className="absolute left-6 top-6">
                                   <span className="inline-flex rounded-full border border-white/10 bg-black/40 px-4 py-2 text-[10px] uppercase tracking-[0.3em] text-gold/80 backdrop-blur">
                                     {item.subtitle}
                                   </span>
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 p-6">
-                                  <h3 className="font-playfair text-2xl font-semibold text-white md:text-3xl">
-                                    {item.title}
-                                  </h3>
-                                  <div className="mt-4 h-px w-20 bg-gradient-to-r from-gold/70 to-transparent" />
+                                <div className="absolute bottom-0 left-0 right-0 p-6 flex items-end justify-between">
+                                  <div>
+                                    <h3 className="font-playfair text-2xl font-semibold text-white md:text-3xl group-hover:text-gold transition-colors">
+                                      {item.title}
+                                    </h3>
+                                    <div className="mt-4 h-px w-20 bg-gradient-to-r from-gold/70 to-transparent transition-all duration-300 group-hover:w-32" />
+                                  </div>
+                                  <span className="inline-flex items-center text-xs font-semibold uppercase tracking-wider text-gold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    Explore →
+                                  </span>
                                 </div>
                               </div>
-                            </div>
+                            </Link>
                           </motion.div>
                         )
                       })}
@@ -1249,8 +1257,11 @@ export default function Home() {
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ duration: 0.3, delay: index * 0.04 }}
                         >
-                          <div className="group flex flex-col items-center">
-                            <div className="relative w-full aspect-square overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition-all duration-300 group-hover:border-gold/40 group-hover:shadow-[0_0_15px_rgba(212,175,55,0.15)] luxury-shadow">
+                          <Link
+                            href={`/products?flag=${encodeURIComponent(item.title)}`}
+                            className="group flex flex-col items-center cursor-pointer"
+                          >
+                            <div className="relative w-full aspect-square overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition-all duration-300 group-hover:border-gold/60 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.25)] luxury-shadow">
                               <Image
                                 src={item.image}
                                 alt={item.title}
@@ -1263,7 +1274,7 @@ export default function Home() {
                             <span className="mt-2 text-center text-xs font-medium tracking-wide text-gray-300 group-hover:text-gold transition-colors duration-300 line-clamp-2">
                               {item.title}
                             </span>
-                          </div>
+                          </Link>
                         </motion.div>
                       ))}
                     </div>

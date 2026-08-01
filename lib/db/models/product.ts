@@ -36,6 +36,7 @@ export interface IProduct extends Document {
   ingredients?: string
   howToUse?: string
   tags: string[]
+  visibilityFlags?: string[]
   rating: number
   reviewCount: number
   featured: boolean
@@ -131,6 +132,7 @@ const productSchema = new Schema<IProduct>(
       type: String,
     },
     tags: [String],
+    visibilityFlags: [String],
     rating: {
       type: Number,
       default: 0,

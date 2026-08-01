@@ -140,7 +140,7 @@ export default function AdminCouponsPage() {
         description="Create promotional offers and toggle their active state for campaign testing."
       />
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+      <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
         <div className="space-y-6">
           <AdminPanel
             title={editingId ? 'Edit Coupon' : 'Create Coupon'}

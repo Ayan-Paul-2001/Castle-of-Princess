@@ -176,23 +176,40 @@ function PromoPopup() {
 function FaviconSync() {
   useEffect(() => {
     const updateFavicon = (url: string) => {
-      // Remove all existing favicon links to prevent conflicts
-      const existingLinks = document.querySelectorAll("link[rel*='icon']")
-      existingLinks.forEach((link) => {
-        link.parentNode?.removeChild(link)
-      })
+      if (!url) return
 
-      // Create a clean new link element
-      const link = document.createElement('link')
-      link.rel = 'icon'
-      link.href = url
-      document.head.appendChild(link)
+      // Update or create main rel="icon"
+      let iconLink = document.querySelector("link[rel='icon']") as HTMLLinkElement | null
+      if (!iconLink) {
+        iconLink = document.createElement('link')
+        iconLink.rel = 'icon'
+        document.head.appendChild(iconLink)
+      }
+      iconLink.href = url
+
+      // Update or create rel="shortcut icon"
+      let shortcutLink = document.querySelector("link[rel='shortcut icon']") as HTMLLinkElement | null
+      if (!shortcutLink) {
+        shortcutLink = document.createElement('link')
+        shortcutLink.rel = 'shortcut icon'
+        document.head.appendChild(shortcutLink)
+      }
+      shortcutLink.href = url
+
+      // Update or create rel="apple-touch-icon"
+      let appleLink = document.querySelector("link[rel='apple-touch-icon']") as HTMLLinkElement | null
+      if (!appleLink) {
+        appleLink = document.createElement('link')
+        appleLink.rel = 'apple-touch-icon'
+        document.head.appendChild(appleLink)
+      }
+      appleLink.href = url
     }
 
     const loadFavicon = () => {
       const savedFavicon = localStorage.getItem('cop_favicon')
-      if (savedFavicon) {
-        updateFavicon(savedFavicon)
+      if (savedFavicon && savedFavicon.trim()) {
+        updateFavicon(savedFavicon.trim())
         return
       }
 
@@ -200,17 +217,15 @@ function FaviconSync() {
       if (savedBrand) {
         try {
           const parsed = JSON.parse(savedBrand)
-          if (parsed.favicon) {
-            updateFavicon(parsed.favicon)
+          if (parsed.favicon && typeof parsed.favicon === 'string' && parsed.favicon.trim()) {
+            updateFavicon(parsed.favicon.trim())
             return
           }
         } catch (e) {
           console.error('Error parsing brand settings for favicon:', e)
         }
       }
-
-      // Reset to default
-      updateFavicon('/favicon.ico')
+      // If no localStorage override, keep server-rendered SSR favicon metadata intact
     }
 
     loadFavicon()
@@ -233,14 +248,10 @@ function StoreDbSync() {
   useEffect(() => {
     fetch('/api/sync')
       .then((res) => {
-        if (!res.ok) {
-          console.warn('Unable to sync local storage with MongoDB (API returned non-OK status). Using local defaults.')
-          return null
-        }
+        if (!res.ok) throw new Error()
         return res.json()
       })
       .then((dbData) => {
-        if (!dbData) return
         const keysToSync = [
           { dbKey: 'products', storageKey: 'cop_products' },
           { dbKey: 'categories', storageKey: 'cop_categories' },

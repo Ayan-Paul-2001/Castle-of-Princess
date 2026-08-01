@@ -16,7 +16,7 @@ export default function AdminPanel({
   className = '',
 }: AdminPanelProps) {
   return (
-    <section className={`glass rounded-2xl p-6 min-w-0 overflow-hidden ${className}`}>
+    <section className={`glass rounded-2xl p-6 ${className}`}>
       {(title || action) && (
         <div className="mb-5 flex flex-col gap-4 border-b border-white/10 pb-5 md:flex-row md:items-end md:justify-between">
           <div>
