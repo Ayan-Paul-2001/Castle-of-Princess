@@ -17,8 +17,7 @@ const defaultHeroSlides = [
     description:
       'Discover premium Korean skincare and cosmetics curated for modern beauty lovers in Bangladesh.',
     accent: 'Exclusive launches, bestsellers, and silky formulas in one destination.',
-    image:
-      'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1600&q=80',
+    image: '/hero-1.webp',
     primaryHref: '/products',
     primaryLabel: 'Shop The Collection',
     secondaryHref: '/products?featured=true',
@@ -31,7 +30,7 @@ const defaultHeroSlides = [
       'Build a glow-first routine with essences, toners, and serums from iconic Korean skincare brands.',
     accent: 'Shop glossy textures and barrier-loving formulas for luminous skin.',
     image:
-      'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1600&q=80',
+      'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1200&q=75',
     primaryHref: '/products?concern=glass-skin',
     primaryLabel: 'Shop Glass Skin',
     secondaryHref: '/products?category=serum-essence',
@@ -44,7 +43,7 @@ const defaultHeroSlides = [
       'Elevate your beauty shelf with trending Korean skincare, makeup, and limited-time luxury offers.',
     accent: 'Designed for soft glam mornings, silky nights, and premium gifting.',
     image:
-      'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1600&q=80',
+      'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1200&q=75',
     primaryHref: '/products?onSale=true',
     primaryLabel: 'Shop Offers',
     secondaryHref: '/about',
@@ -659,27 +658,17 @@ export default function Home() {
           case 'home.hero':
             return (
               <section key={section.id} className="relative min-h-[100svh] overflow-hidden">
-                <link rel="preload" href={currentSlide.image} as="image" fetchPriority="high" />
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={currentSlide.image}
-                    initial={{ opacity: 0, scale: 1.06 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.98 }}
-                    transition={{ duration: 0.9, ease: 'easeOut' }}
-                    className="absolute inset-0"
-                  >
-                    <Image
-                      src={currentSlide.image}
-                      alt={currentSlide.title || "Hero banner"}
-                      fill
-                      priority
-                      fetchPriority="high"
-                      sizes="100vw"
-                      className="object-cover"
-                    />
-                  </motion.div>
-                </AnimatePresence>
+                <div key={currentSlide.image} className="absolute inset-0">
+                  <Image
+                    src={currentSlide.image}
+                    alt={currentSlide.title || "Hero banner"}
+                    fill
+                    priority
+                    fetchPriority="high"
+                    sizes="100vw"
+                    className="object-cover transition-opacity duration-700"
+                  />
+                </div>
                 <div className="absolute inset-0 bg-black/45" />
                 <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-black/30" />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black" />
@@ -702,14 +691,9 @@ export default function Home() {
 
                 <div className="relative z-10 flex min-h-[100svh] items-center px-4 pt-24 pb-10 sm:pb-16 lg:pt-28">
                   <div className="mx-auto grid w-full max-w-7xl gap-8 sm:gap-10 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end">
-                    <AnimatePresence mode="wait">
-                      <motion.div
+                      <div
                         key={activeSlide}
-                        initial={{ opacity: 0, y: 28 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -18 }}
-                        transition={{ duration: 0.55, ease: 'easeOut' }}
-                        className="max-w-4xl text-center sm:text-left"
+                        className="max-w-4xl text-center sm:text-left transition-opacity duration-300"
                       >
                         <div className="mb-3 sm:mb-6">
                           <span className="inline-flex rounded-full border border-gold/30 bg-black/30 px-4 py-1.5 text-xs uppercase tracking-[0.35em] text-gold backdrop-blur-xl sm:px-5 sm:py-2 sm:text-sm">
@@ -754,8 +738,7 @@ export default function Home() {
                             {currentSlide.secondaryLabel}
                           </Link>
                         </div>
-                      </motion.div>
-                    </AnimatePresence>
+                      </div>
 
                     <div className="flex flex-col items-center gap-4 sm:gap-5 lg:items-end">
                       <div className="glass hidden w-full max-w-[280px] rounded-[2rem] p-5 lg:block">
@@ -878,9 +861,7 @@ export default function Home() {
                   </div>
 
                   {filteredCategories.length === 0 ? (
-                    <motion.div
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
+                    <div
                       className="text-center py-16 glass rounded-[2rem] border border-white/5 max-w-lg mx-auto p-8"
                     >
                       <p className="text-gray-400 text-lg mb-4 font-light">
@@ -893,18 +874,15 @@ export default function Home() {
                       >
                         Reset Search
                       </button>
-                    </motion.div>
+                    </div>
                   ) : (
                     <>
                       {/* Desktop Grid View */}
                       <div className="hidden sm:grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                         {filteredCategories.map((category, index) => (
-                          <motion.div
+                          <div
                             key={category.slug}
-                            initial={{ opacity: 0, y: 24 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true, amount: 0.2 }}
-                            transition={{ duration: 0.45, delay: index * 0.08 }}
+                            className="transition-all duration-300"
                           >
                             <Link
                               href={`/products?category=${category.slug}`}
@@ -917,6 +895,12 @@ export default function Home() {
                                   fill
                                   className="object-cover transition-transform duration-700 group-hover:scale-110"
                                   sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                                  onError={(e) => {
+                                    const target = e.currentTarget as HTMLImageElement
+                                    if (target && !target.src.includes('cleanser.jpg')) {
+                                      target.src = '/categories/cleanser.jpg'
+                                    }
+                                  }}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
                                 <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[linear-gradient(135deg,rgba(212,175,55,0.12),transparent_45%,rgba(255,255,255,0.08))]" />
@@ -938,18 +922,16 @@ export default function Home() {
                                 </div>
                               </div>
                             </Link>
-                          </motion.div>
+                          </div>
                         ))}
                       </div>
 
                       {/* Mobile Grid View */}
                       <div className="grid grid-cols-3 gap-x-3 gap-y-6 sm:hidden">
                         {filteredCategories.map((category, index) => (
-                          <motion.div
+                          <div
                             key={category.slug}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.3, delay: index * 0.04 }}
+                            className="transition-all duration-300"
                           >
                             <Link
                               href={`/products?category=${category.slug}`}
@@ -962,6 +944,12 @@ export default function Home() {
                                   fill
                                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                                   sizes="(max-width: 640px) 33vw, 120px"
+                                  onError={(e) => {
+                                    const target = e.currentTarget as HTMLImageElement
+                                    if (target && !target.src.includes('cleanser.jpg')) {
+                                      target.src = '/categories/cleanser.jpg'
+                                    }
+                                  }}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                               </div>
@@ -969,7 +957,7 @@ export default function Home() {
                                 {category.name}
                               </span>
                             </Link>
-                          </motion.div>
+                          </div>
                         ))}
                       </div>
                     </>
@@ -977,7 +965,7 @@ export default function Home() {
                 </div>
               </section>
             )
-          case 'home.bestSelling':
+          case 'home.bestsellers':
             return (
               <section key={section.id} className="px-4 py-10 sm:py-20 silk-overlay">
                 <div className="mx-auto max-w-7xl">
@@ -1005,13 +993,9 @@ export default function Home() {
                     {/* Desktop Beauty Shots View */}
                     <div className="hidden sm:grid mb-10 gap-4 sm:grid-cols-3">
                       {landingBeautyShots.map((shot, index) => (
-                        <motion.div
+                        <div
                           key={shot.title}
-                          initial={{ opacity: 0, y: 24 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true, amount: 0.2 }}
-                          transition={{ duration: 0.45, delay: index * 0.08 }}
-                          className="group relative overflow-hidden rounded-[2rem] glass luxury-shadow"
+                          className="group relative overflow-hidden rounded-[2rem] glass luxury-shadow transition-all duration-300"
                         >
                           <div className="relative aspect-[4/3]">
                             <Image
@@ -1020,24 +1004,28 @@ export default function Home() {
                               fill
                               className="object-cover transition-transform duration-700 group-hover:scale-110"
                               sizes="(max-width: 768px) 100vw, 33vw"
+                              onError={(e) => {
+                                const target = e.currentTarget as HTMLImageElement
+                                if (target && !target.src.includes('cleanser.jpg')) {
+                                  target.src = '/categories/cleanser.jpg'
+                                }
+                              }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/15 to-transparent" />
                             <div className="absolute bottom-0 left-0 right-0 p-5">
                               <p className="font-playfair text-2xl text-white">{shot.title}</p>
                             </div>
                           </div>
-                        </motion.div>
+                        </div>
                       ))}
                     </div>
 
                     {/* Mobile Beauty Shots View */}
                     <div className="grid grid-cols-3 gap-x-3 gap-y-6 sm:hidden mb-8">
                       {landingBeautyShots.map((shot, index) => (
-                        <motion.div
+                        <div
                           key={shot.title}
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.3, delay: index * 0.04 }}
+                          className="transition-all duration-300"
                         >
                           <div className="group flex flex-col items-center">
                             <div className="relative w-full aspect-square overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition-all duration-300 group-hover:border-gold/40 group-hover:shadow-[0_0_15px_rgba(212,175,55,0.15)] luxury-shadow">
@@ -1047,6 +1035,12 @@ export default function Home() {
                                 fill
                                 className="object-cover transition-transform duration-500 group-hover:scale-110"
                                 sizes="(max-width: 640px) 33vw, 120px"
+                                onError={(e) => {
+                                  const target = e.currentTarget as HTMLImageElement
+                                  if (target && !target.src.includes('cleanser.jpg')) {
+                                    target.src = '/categories/cleanser.jpg'
+                                  }
+                                }}
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                             </div>
@@ -1054,22 +1048,19 @@ export default function Home() {
                               {shot.title}
                             </span>
                           </div>
-                        </motion.div>
+                        </div>
                       ))}
                     </div>
                   </>
 
                   <div className="grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-2 xl:grid-cols-4">
                     {bestSellingProducts.map((product, index) => (
-                      <motion.div
+                      <div
                         key={product.id}
-                        initial={{ opacity: 0, y: 24 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, amount: 0.2 }}
-                        transition={{ duration: 0.45, delay: index * 0.08 }}
+                        className="transition-all duration-300"
                       >
                         <ProductCard {...product} />
-                      </motion.div>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -1160,6 +1151,12 @@ export default function Home() {
                               fill
                               className="object-cover transition-transform duration-500 group-hover:scale-110"
                               sizes="96px"
+                              onError={(e) => {
+                                const target = e.currentTarget as HTMLImageElement
+                                if (target && !target.src.includes('cleanser.jpg')) {
+                                  target.src = '/categories/cleanser.jpg'
+                                }
+                              }}
                             />
                           </div>
                           <div className="min-w-0 flex-1">
@@ -1222,6 +1219,12 @@ export default function Home() {
                                   fill
                                   className="object-cover opacity-95 transition-transform duration-700 group-hover:scale-110"
                                   sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
+                                  onError={(e) => {
+                                    const target = e.currentTarget as HTMLImageElement
+                                    if (target && !target.src.includes('cleanser.jpg')) {
+                                      target.src = '/categories/cleanser.jpg'
+                                    }
+                                  }}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent" />
                                 <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[linear-gradient(135deg,rgba(212,175,55,0.18),transparent_45%,rgba(255,255,255,0.06))]" />
@@ -1268,6 +1271,12 @@ export default function Home() {
                                 fill
                                 className="object-cover transition-transform duration-500 group-hover:scale-110"
                                 sizes="(max-width: 640px) 33vw, 120px"
+                                onError={(e) => {
+                                  const target = e.currentTarget as HTMLImageElement
+                                  if (target && !target.src.includes('cleanser.jpg')) {
+                                    target.src = '/categories/cleanser.jpg'
+                                  }
+                                }}
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                             </div>

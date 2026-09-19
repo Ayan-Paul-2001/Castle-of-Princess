@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import toast from 'react-hot-toast'
 import { mockProducts, type MockProduct } from '@/lib/products-mock'
 import { getMockProducts, getAdminReviews, saveAdminReview, type AdminReview } from '@/lib/products-store'
+import { getOptimizedImageUrl } from '@/lib/utils/cloudinary-url'
 
 export default function ProductDetailsPage({
   params,
@@ -26,6 +27,14 @@ export default function ProductDetailsPage({
     return mockProducts.find(
       (p) => p.slug === slug || p.slug === slug.replace('soothing', 'sooting')
     ) || mockProducts[0]
+  })
+
+  const [selectedImage, setSelectedImage] = useState(0)
+  const [mainImgSrc, setMainImgSrc] = useState<string>(() => {
+    const p = mockProducts.find(
+      (item) => item.slug === slug || item.slug === slug.replace('soothing', 'sooting')
+    ) || mockProducts[0]
+    return getOptimizedImageUrl(p.images?.[0] || (p as any).image)
   })
 
   const [reviewsList, setReviewsList] = useState<AdminReview[]>([])
@@ -77,6 +86,8 @@ export default function ProductDetailsPage({
       )
       if (found) {
         setProduct(found)
+        const primary = found.images?.[0] || (found as any).image
+        setMainImgSrc(getOptimizedImageUrl(primary))
       }
       setReviewsList(getAdminReviews())
     }
@@ -91,6 +102,11 @@ export default function ProductDetailsPage({
 
   const mockProduct = product
   const router = useRouter()
+
+  useEffect(() => {
+    const activeUrl = mockProduct.images?.[selectedImage] || (mockProduct as any).image
+    setMainImgSrc(getOptimizedImageUrl(activeUrl))
+  }, [mockProduct, selectedImage])
 
   const productReviews = useMemo(() => {
     return reviewsList.filter((r) => r.product === mockProduct.name && r.status === 'approved')
@@ -145,7 +161,6 @@ export default function ProductDetailsPage({
       }
     }
   }, [productReviews, mockProduct])
-  const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [expanded, setExpanded] = useState<string | null>('description')
   
@@ -218,13 +233,20 @@ export default function ProductDetailsPage({
             animate={{ opacity: 1, x: 0 }}
             className="space-y-4"
           >
-            <div className="relative aspect-square rounded-3xl overflow-hidden glass">
+            <div className="relative aspect-square rounded-3xl overflow-hidden glass bg-black/40">
               <Image
-                src={mockProduct.images[selectedImage]}
+                src={mainImgSrc}
                 alt={mockProduct.name}
                 fill
-                className="object-cover"
+                quality={95}
+                sizes="(max-width: 768px) 100vw, 600px"
+                className="object-contain p-3"
                 priority
+                onError={() => {
+                  if (mainImgSrc !== '/categories/cleanser.jpg' && mainImgSrc !== '/placeholder.jpg') {
+                    setMainImgSrc('/categories/cleanser.jpg')
+                  }
+                }}
               />
               
               {/* Badges */}
@@ -254,21 +276,29 @@ export default function ProductDetailsPage({
 
             {/* Thumbnails */}
             <div className="grid grid-cols-3 gap-4">
-              {mockProduct.images.map((image, index) => (
+              {(mockProduct.images || []).map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`relative aspect-square rounded-xl overflow-hidden transition-all ${
+                  className={`relative aspect-square rounded-xl overflow-hidden transition-all bg-black/40 ${
                     selectedImage === index
                       ? 'ring-2 ring-gold glow-gold'
                       : 'opacity-60 hover:opacity-100'
                   }`}
                 >
                   <Image
-                    src={image}
+                    src={getOptimizedImageUrl(image)}
                     alt={`${mockProduct.name} ${index + 1}`}
                     fill
-                    className="object-cover"
+                    quality={90}
+                    sizes="150px"
+                    className="object-contain p-1"
+                    onError={(e) => {
+                      const target = e.currentTarget as HTMLImageElement
+                      if (target && !target.src.includes('cleanser.jpg')) {
+                        target.src = '/categories/cleanser.jpg'
+                      }
+                    }}
                   />
                 </button>
               ))}

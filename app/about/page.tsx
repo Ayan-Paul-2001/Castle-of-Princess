@@ -86,6 +86,12 @@ export default function AboutPage() {
                           className="object-cover opacity-80"
                           sizes="(max-width: 1024px) 100vw, 40vw"
                           priority
+                          onError={(e) => {
+                            const target = e.currentTarget as HTMLImageElement
+                            if (target && !target.src.includes('cleanser.jpg')) {
+                              target.src = '/categories/cleanser.jpg'
+                            }
+                          }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent" />
                         <div className="absolute inset-x-0 bottom-0 p-4 sm:p-8">
@@ -150,6 +156,12 @@ export default function AboutPage() {
                         fill
                         className="object-cover opacity-80"
                         sizes="(max-width: 1024px) 100vw, 40vw"
+                        onError={(e) => {
+                          const target = e.currentTarget as HTMLImageElement
+                          if (target && !target.src.includes('cleanser.jpg')) {
+                            target.src = '/categories/cleanser.jpg'
+                          }
+                        }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent" />
                     </div>

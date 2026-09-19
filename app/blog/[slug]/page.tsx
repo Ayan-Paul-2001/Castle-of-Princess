@@ -21,13 +21,17 @@ export async function generateStaticParams() {
 
 async function getDbPost(slug: string) {
   if (!process.env.MONGODB_URI) return null
-  const [{ connectDB }, { default: BlogPost }] = await Promise.all([
-    import('@/lib/db/connect'),
-    import('@/lib/db/models/blog-post'),
-  ])
-  await connectDB()
-  const filter = { slug, status: 'published' }
-  return BlogPost.findOne(filter).lean()
+  try {
+    const [{ connectDB }, { default: BlogPost }] = await Promise.all([
+      import('@/lib/db/connect'),
+      import('@/lib/db/models/blog-post'),
+    ])
+    await connectDB()
+    const filter = { slug, status: 'published' }
+    return await BlogPost.findOne(filter).lean()
+  } catch (error) {
+    return null
+  }
 }
 
 export async function generateMetadata({

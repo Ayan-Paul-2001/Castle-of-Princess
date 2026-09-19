@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
 import toast from 'react-hot-toast'
 import { Upload } from 'lucide-react'
@@ -301,10 +302,13 @@ export default function AdminSettingsPage() {
             {favicon ? (
               <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                 <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black/40 flex items-center justify-center">
-                  <img
+                  <Image
                     src={favicon}
                     alt="Favicon Preview"
-                    className="h-8 w-8 object-contain"
+                    width={32}
+                    height={32}
+                    unoptimized
+                    className="object-contain"
                   />
                 </div>
                 <div className="flex-1">

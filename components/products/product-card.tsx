@@ -3,13 +3,13 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Heart, ShoppingCart, Eye } from 'lucide-react'
-import { motion } from 'framer-motion'
 import { formatPrice } from '@/lib/utils/cn'
 import { useCartStore } from '@/stores/cart-store'
 import { useWishlistStore } from '@/stores/wishlist-store'
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { getOptimizedImageUrl } from '@/lib/utils/cloudinary-url'
 
 interface ProductCardProps {
   id: string
@@ -44,6 +44,7 @@ export default function ProductCard({
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
+  const [imgSrc, setImgSrc] = useState<string>(() => getOptimizedImageUrl(image))
   const { addItem, openCart } = useCartStore()
   const { isInWishlist, toggleItem } = useWishlistStore()
   const inWishlist = isMounted ? isInWishlist(productId) : false
@@ -52,6 +53,10 @@ export default function ProductCard({
     setIsMounted(true)
   }, [])
 
+  useEffect(() => {
+    setImgSrc(getOptimizedImageUrl(image))
+  }, [image])
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -59,7 +64,7 @@ export default function ProductCard({
       id: `${productId}-${Date.now()}`,
       productId,
       name,
-      image,
+      image: imgSrc,
       price,
       salePrice,
       quantity: 1,
@@ -70,7 +75,7 @@ export default function ProductCard({
   const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    const wishlistItem = { id, productId, slug, name, image, price, salePrice }
+    const wishlistItem = { id, productId, slug, name, image: imgSrc, price, salePrice }
     const exists = isInWishlist(productId)
 
     toggleItem(wishlistItem)
@@ -82,11 +87,8 @@ export default function ProductCard({
     : 0
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="group relative h-full"
+    <div
+      className="group relative h-full transition-all duration-300"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -95,11 +97,17 @@ export default function ProductCard({
           {/* Image Container */}
           <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-gray-900 to-black">
             <Image
-              src={image || '/categories/Cleanser.jpg'}
+              src={imgSrc}
               alt={name}
               fill
+              quality={90}
               className="object-cover transition-transform duration-700 group-hover:scale-110"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              onError={() => {
+                if (imgSrc !== '/categories/cleanser.jpg' && imgSrc !== '/placeholder.jpg') {
+                  setImgSrc('/categories/cleanser.jpg')
+                }
+              }}
             />
 
             {/* Reflection Effect */}
@@ -124,7 +132,6 @@ export default function ProductCard({
               )}
             </div>
 
-            {/* Quick Actions */}
             <div
               className={`absolute top-2 right-2 sm:top-3 sm:right-3 flex flex-col gap-1.5 sm:gap-2 transition-all duration-300 ${
                 isHovered
@@ -137,38 +144,13 @@ export default function ProductCard({
                 className={`p-1.5 sm:p-2 rounded-full backdrop-blur-xl transition-all duration-300 hover:scale-110 ${
                   inWishlist
                     ? 'bg-red-500 text-white'
-                    : 'bg-white/10 text-white hover:bg-white/20'
+                    : 'bg-black/40 text-white hover:bg-gold hover:text-black border border-white/10'
                 }`}
                 aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
               >
                 <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${inWishlist ? 'fill-current' : ''}`} />
               </button>
-              <button
-                className="p-1.5 sm:p-2 rounded-full bg-white/10 backdrop-blur-xl text-white hover:bg-white/20 transition-all duration-300 hover:scale-110"
-                aria-label="View product details"
-              >
-                <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
             </div>
-
-            {/* Add to Cart Button (Desktop Hover Only) */}
-            <div
-              className={`absolute bottom-3 left-3 right-3 transition-all duration-500 hidden sm:block ${
-                isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-              }`}
-            >
-              <Button
-                variant="gold"
-                size="sm"
-                className="w-full group"
-                onClick={handleAddToCart}
-              >
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Add to Cart
-              </Button>
-            </div>
-
-            {/* Stock Status */}
             {stock <= 5 && stock > 0 && (
               <div className="absolute bottom-3 left-3">
                 <span className="px-2 py-1 bg-orange-500/90 text-white text-[10px] sm:text-xs font-medium rounded">
@@ -234,6 +216,6 @@ export default function ProductCard({
           </div>
         </div>
       </Link>
-    </motion.div>
+    </div>
   )
 }

@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { useCartStore, CartItem } from '@/stores/cart-store'
 import { formatPrice } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/button'
+import { getOptimizedImageUrl } from '@/lib/utils/cloudinary-url'
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQuantity, getTotalPrice } =
@@ -134,10 +135,16 @@ function CartItemCard({
     >
       <div className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden">
         <Image
-          src={item.image}
+          src={getOptimizedImageUrl(item.image)}
           alt={item.name}
           fill
           className="object-cover"
+          onError={(e) => {
+            const target = e.currentTarget as HTMLImageElement
+            if (target && !target.src.includes('cleanser.jpg')) {
+              target.src = '/categories/cleanser.jpg'
+            }
+          }}
         />
       </div>
 

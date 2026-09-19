@@ -3,7 +3,6 @@
 import { ReactNode, useEffect, useState, Suspense } from 'react'
 import Header from './header/header'
 import Footer from './footer/footer'
-import CartDrawer from '@/components/cart/cart-drawer'
 import { SessionProvider, useSession } from 'next-auth/react'
 import { useCartStore } from '@/stores/cart-store'
 import { useWishlistStore } from '@/stores/wishlist-store'
@@ -117,6 +116,7 @@ function PromoPopup() {
           >
             <div className="relative aspect-[16/9] w-full">
               {isDataUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
                 <img src={bannerUrl} alt={bannerAlt} className="h-full w-full object-cover" />
               ) : (
                 <Image
@@ -244,56 +244,69 @@ function FaviconSync() {
   return null
 }
 
+import dynamic from 'next/dynamic'
+
+const CartDrawer = dynamic(() => import('@/components/cart/cart-drawer'), { ssr: false })
+
 function StoreDbSync() {
   useEffect(() => {
-    fetch('/api/sync')
-      .then((res) => {
-        if (!res.ok) throw new Error()
-        return res.json()
-      })
-      .then((dbData) => {
-        const keysToSync = [
-          { dbKey: 'products', storageKey: 'cop_products' },
-          { dbKey: 'categories', storageKey: 'cop_categories' },
-          { dbKey: 'brands', storageKey: 'cop_brands' },
-          { dbKey: 'store_settings', storageKey: 'cop_store_settings' },
-          { dbKey: 'brand_settings', storageKey: 'cop_brand_settings' },
-          { dbKey: 'favicon', storageKey: 'cop_favicon' },
-          { dbKey: 'banners', storageKey: 'cop_banners' },
-          { dbKey: 'coupons', storageKey: 'cop_coupons' },
-          { dbKey: 'reviews', storageKey: 'cop_reviews' },
-          { dbKey: 'promo_popup', storageKey: 'cop_promo_popup_v1' },
-          { dbKey: 'blog_posts', storageKey: 'cop_blog_posts' },
-          { dbKey: 'shipping_settings', storageKey: 'cop_shipping_discount_store' },
-        ]
+    const doSync = () => {
+      fetch('/api/sync')
+        .then((res) => {
+          if (!res.ok) throw new Error()
+          return res.json()
+        })
+        .then((dbData) => {
+          const keysToSync = [
+            { dbKey: 'products', storageKey: 'cop_products' },
+            { dbKey: 'categories', storageKey: 'cop_categories' },
+            { dbKey: 'brands', storageKey: 'cop_brands' },
+            { dbKey: 'store_settings', storageKey: 'cop_store_settings' },
+            { dbKey: 'brand_settings', storageKey: 'cop_brand_settings' },
+            { dbKey: 'favicon', storageKey: 'cop_favicon' },
+            { dbKey: 'banners', storageKey: 'cop_banners' },
+            { dbKey: 'coupons', storageKey: 'cop_coupons' },
+            { dbKey: 'reviews', storageKey: 'cop_reviews' },
+            { dbKey: 'promo_popup', storageKey: 'cop_promo_popup_v1' },
+            { dbKey: 'blog_posts', storageKey: 'cop_blog_posts' },
+            { dbKey: 'shipping_settings', storageKey: 'cop_shipping_discount_store' },
+          ]
 
+          let updatedAny = false
 
-        let updatedAny = false
-
-        keysToSync.forEach(({ dbKey, storageKey }) => {
-          const dbValue = dbData[dbKey]
-          if (dbValue !== undefined) {
-            const currentStr = localStorage.getItem(storageKey)
-            const newStr = typeof dbValue === 'string' ? dbValue : JSON.stringify(dbValue)
-            if (currentStr !== newStr) {
-              localStorage.setItem(storageKey, newStr)
-              updatedAny = true
+          keysToSync.forEach(({ dbKey, storageKey }) => {
+            const dbValue = dbData[dbKey]
+            if (dbValue !== undefined) {
+              const currentStr = localStorage.getItem(storageKey)
+              const newStr = typeof dbValue === 'string' ? dbValue : JSON.stringify(dbValue)
+              if (currentStr !== newStr) {
+                localStorage.setItem(storageKey, newStr)
+                updatedAny = true
+              }
             }
+          })
+
+          if (updatedAny) {
+            window.dispatchEvent(new Event('cop:promoPopupUpdated'))
+            window.dispatchEvent(new Event('cop:faviconUpdated'))
+            window.dispatchEvent(new Event('cop:brandSettingsUpdated'))
+            window.dispatchEvent(new Event('cop:storeSettingsUpdated'))
+            window.dispatchEvent(new Event('cop:syncComplete'))
+            window.dispatchEvent(new Event('storage'))
           }
         })
+        .catch((err) => {
+          console.error('Error synchronizing local storage with MongoDB:', err)
+        })
+    }
 
-        if (updatedAny) {
-          window.dispatchEvent(new Event('cop:promoPopupUpdated'))
-          window.dispatchEvent(new Event('cop:faviconUpdated'))
-          window.dispatchEvent(new Event('cop:brandSettingsUpdated'))
-          window.dispatchEvent(new Event('cop:storeSettingsUpdated'))
-          window.dispatchEvent(new Event('cop:syncComplete'))
-          window.dispatchEvent(new Event('storage'))
-        }
-      })
-      .catch((err) => {
-        console.error('Error synchronizing local storage with MongoDB:', err)
-      })
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      const handle = (window as any).requestIdleCallback(doSync, { timeout: 3000 })
+      return () => (window as any).cancelIdleCallback(handle)
+    } else {
+      const timer = setTimeout(doSync, 2000)
+      return () => clearTimeout(timer)
+    }
   }, [])
 
   return null
@@ -311,10 +324,11 @@ export default function Providers({ children }: { children: ReactNode }) {
       <Suspense fallback={<div className="h-20" />}>
         <Header />
       </Suspense>
-      <main className="min-h-screen">{children}</main>
+      <div className="min-h-screen">{children}</div>
       {!isAdmin && <Footer />}
       {!isAdmin && <CartDrawer />}
       {!isAdmin && <PromoPopup />}
     </SessionProvider>
   )
 }
+

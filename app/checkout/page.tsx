@@ -7,8 +7,8 @@ import { type IAddress } from '@/components/account/profile-client'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { ArrowLeft, Plus, Minus, Trash2, ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useSession } from 'next-auth/react'
+import { ArrowLeft, Plus, Minus, Trash2, ShoppingBag, ChevronLeft, ChevronRight, CheckCircle2, UserPlus, Zap } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import toast from 'react-hot-toast'
@@ -18,15 +18,24 @@ import { formatPrice } from '@/lib/utils/cn'
 import { checkoutSchema, CheckoutInput } from '@/lib/utils/validators/schemas'
 import { Button } from '@/components/ui/button'
 import ProductCard from '@/components/products/product-card'
+import { getOptimizedImageUrl } from '@/lib/utils/cloudinary-url'
 
 const BKASH_MERCHANT_NUMBER = process.env.NEXT_PUBLIC_BKASH_MERCHANT_NUMBER || '01XXXXXXXXX'
 const NAGAD_MERCHANT_NUMBER = process.env.NEXT_PUBLIC_NAGAD_MERCHANT_NUMBER || '01XXXXXXXXX'
 
 export default function CheckoutPage() {
   const router = useRouter()
+  const { data: session } = useSession()
   const { items, getTotalPrice, clearCart } = useCartStore()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
+  const [guestOrderSuccess, setGuestOrderSuccess] = useState<{
+    orderNumber: string
+    name: string
+    phone: string
+    total: number
+    paymentMethod: string
+  } | null>(null)
 
   const [couponInput, setCouponInput] = useState('')
   const [appliedCoupon, setAppliedCoupon] = useState<AdminCoupon | null>(null)
@@ -303,9 +312,20 @@ export default function CheckoutPage() {
         return
       }
 
-      toast.success('Order placed!')
+      toast.success('Order placed successfully!')
       clearCart()
-      router.push('/account')
+
+      if (session?.user) {
+        router.push('/account')
+      } else {
+        setGuestOrderSuccess({
+          orderNumber: result.order?.orderNumber || 'CP' + Date.now().toString().slice(-6),
+          name: data.name,
+          phone: data.phone,
+          total,
+          paymentMethod: data.paymentMethod,
+        })
+      }
     } catch (error) {
       toast.error('Something went wrong. Please try again.')
     } finally {
@@ -319,6 +339,75 @@ export default function CheckoutPage() {
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-gold border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <h2 className="text-xl font-medium text-white">Loading checkout...</h2>
+        </div>
+      </div>
+    )
+  }
+
+  if (guestOrderSuccess) {
+    return (
+      <div className="min-h-screen py-16 px-4 flex items-center justify-center silk-overlay">
+        <div className="max-w-2xl w-full glass rounded-3xl p-8 sm:p-12 text-center border border-gold/30 luxury-shadow">
+          <div className="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/30">
+            <CheckCircle2 className="w-10 h-10" />
+          </div>
+
+          <span className="text-gold font-cormorant text-sm uppercase tracking-[0.3em] font-semibold">
+            Order Confirmed
+          </span>
+
+          <h1 className="font-playfair text-3xl sm:text-4xl font-bold text-white mt-2 mb-3">
+            Thank You for Your Order!
+          </h1>
+
+          <p className="text-gray-300 text-sm sm:text-base max-w-md mx-auto mb-6">
+            Your order <span className="text-gold font-semibold">#{guestOrderSuccess.orderNumber}</span> has been received and is being processed.
+          </p>
+
+          <div className="glass rounded-2xl p-5 mb-8 text-left border border-white/10 space-y-2 text-sm text-gray-300">
+            <div className="flex justify-between">
+              <span>Customer Name:</span>
+              <span className="font-medium text-white">{guestOrderSuccess.name}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Phone Number:</span>
+              <span className="font-medium text-white">{guestOrderSuccess.phone}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Payment Method:</span>
+              <span className="font-medium text-white uppercase">{guestOrderSuccess.paymentMethod}</span>
+            </div>
+            <div className="flex justify-between pt-2 border-t border-white/10 text-base font-bold">
+              <span>Total Amount:</span>
+              <span className="text-gold">{formatPrice(guestOrderSuccess.total)}</span>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <p className="text-xs uppercase tracking-widest text-gold font-semibold">
+              Choose Next Action
+            </p>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Link href={`/auth/signup?phone=${encodeURIComponent(guestOrderSuccess.phone)}`}>
+                <Button variant="gold" size="lg" className="w-full h-14 flex items-center justify-center gap-2 text-sm sm:text-base">
+                  <UserPlus className="w-5 h-5" />
+                  Option 1: Create Account
+                </Button>
+              </Link>
+
+              <Link href="/products">
+                <Button variant="outline" size="lg" className="w-full h-14 flex items-center justify-center gap-2 text-sm sm:text-base border-white/20 hover:border-gold">
+                  <ShoppingBag className="w-5 h-5" />
+                  Option 2: Continue as Guest
+                </Button>
+              </Link>
+            </div>
+
+            <p className="text-xs text-gray-400 pt-2">
+              Registering lets you track order status & save addresses. Or continue shopping directly!
+            </p>
+          </div>
         </div>
       </div>
     )
@@ -355,11 +444,7 @@ export default function CheckoutPage() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="grid lg:grid-cols-2 gap-12">
           {/* Shipping Form */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="glass rounded-3xl p-8"
-          >
+          <div className="glass rounded-3xl p-8">
             <h2 className="font-playfair text-2xl font-bold text-white mb-6">
               Shipping Information
             </h2>
@@ -623,14 +708,10 @@ export default function CheckoutPage() {
                 )}
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Order Summary */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="glass rounded-3xl p-8 h-fit"
-          >
+          <div className="glass rounded-3xl p-8 h-fit">
             <h2 className="font-playfair text-2xl font-bold text-white mb-6">
               Order Summary
             </h2>
@@ -640,10 +721,16 @@ export default function CheckoutPage() {
                 <div key={item.id} className="flex gap-4">
                   <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
                     <Image
-                      src={item.image}
+                      src={getOptimizedImageUrl(item.image)}
                       alt={item.name}
                       fill
                       className="object-cover"
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement
+                        if (target && !target.src.includes('cleanser.jpg')) {
+                          target.src = '/categories/cleanser.jpg'
+                        }
+                      }}
                     />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -754,7 +841,7 @@ export default function CheckoutPage() {
             <p className="text-xs text-gray-500 text-center mt-4">
               Wallet orders will be confirmed after manual verification.
             </p>
-          </motion.div>
+          </div>
         </form>
 
         {suggestions.length > 0 && (

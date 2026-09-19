@@ -15,6 +15,7 @@ import {
 export type { AdminProduct, AdminCoupon, AdminReview, AdminBanner, AdminCategory } from './admin-data'
 import { mockProducts, type MockProduct } from './products-mock'
 import { syncToDb } from '@/lib/utils/sync'
+import { getOptimizedImageUrl } from '@/lib/utils/cloudinary-url'
 
 const STORAGE_KEY = 'cop_products'
 const ORDERS_KEY = 'cop_orders'
@@ -61,40 +62,82 @@ export type AdminCustomer = {
   lastOrder: string
 }
 
+// In-memory memoization cache for extreme speed & zero main-thread blocking
+let _cachedMockProducts: MockProduct[] | null = null
+let _cachedAdminProducts: AdminProduct[] | null = null
+let _cachedAdminCategories: AdminCategory[] | null = null
+let _cachedAdminReviews: AdminReview[] | null = null
+
+export function clearStoreCaches() {
+  _cachedMockProducts = null
+  _cachedAdminProducts = null
+  _cachedAdminCategories = null
+  _cachedAdminReviews = null
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', clearStoreCaches)
+  window.addEventListener('cop:syncComplete', clearStoreCaches)
+}
+
 // Helper to convert AdminProduct to MockProduct
 export function mapAdminToMock(prod: AdminProduct): MockProduct {
-  const primaryImage = prod.images.find((img) => img.isPrimary) ?? prod.images[0]
-  const imageUrl = primaryImage ? primaryImage.url : ''
-  const imageUrls = prod.images.map((img) => img.url)
+  const imageList: string[] = []
 
-  // Map category display name to slug
-  const categoryName = prod.category
-  
-  // Find category in the database/localStorage categories list to get the real slug
-  const allCats = getAdminCategories()
-  const foundCat = allCats.find(
-    (c) =>
-      c.name.toLowerCase().trim() === categoryName.toLowerCase().trim() ||
-      c.slug.toLowerCase().trim() === categoryName.toLowerCase().trim()
-  )
-
-  let categorySlug = foundCat ? foundCat.slug : 'cleanser'
-
-  if (!foundCat) {
-    const norm = categoryName.trim().toLowerCase()
-    if (norm.includes('cleanser')) categorySlug = 'cleanser'
-    else if (norm.includes('toner')) categorySlug = 'toner-mist'
-    else if (norm.includes('serum') || norm.includes('essence')) categorySlug = 'serum-essence'
-    else if (norm.includes('moisturiser') || norm.includes('moisturizer')) categorySlug = 'moisturiser'
-    else if (norm.includes('sun') || norm.includes('spf')) categorySlug = 'sun-protection'
-    else if (norm.includes('mask')) categorySlug = 'face-mask'
-    else categorySlug = categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+  // Extract all valid image strings from prod.images (handles objects or strings)
+  const rawImages = (prod as any).images
+  if (Array.isArray(rawImages)) {
+    for (const item of rawImages) {
+      if (typeof item === 'string' && (item as string).trim()) {
+        imageList.push((item as string).trim())
+      } else if (item && typeof item === 'object') {
+        const u = item.url || item.secure_url || item.src || item.image || item.href
+        if (typeof u === 'string' && u.trim()) {
+          if (item.isPrimary) {
+            imageList.unshift(u.trim())
+          } else {
+            imageList.push(u.trim())
+          }
+        }
+      }
+    }
   }
+
+  // Also check prod.image (singular string or object)
+  const singleImage = (prod as any).image
+  if (typeof singleImage === 'string' && singleImage.trim()) {
+    if (!imageList.includes(singleImage.trim())) {
+      imageList.unshift(singleImage.trim())
+    }
+  } else if (singleImage && typeof singleImage === 'object') {
+    const u = singleImage.url || singleImage.secure_url || singleImage.src
+    if (typeof u === 'string' && u.trim() && !imageList.includes(u.trim())) {
+      imageList.unshift(u.trim())
+    }
+  }
+
+  const uniqueUrls = Array.from(new Set(imageList.filter(Boolean)))
+  const imageUrl = uniqueUrls[0] ? getOptimizedImageUrl(uniqueUrls[0]) : '/categories/cleanser.jpg'
+  const finalImages = uniqueUrls.length > 0
+    ? uniqueUrls.map((u) => getOptimizedImageUrl(u))
+    : [imageUrl]
+
+  const categoryName = prod.category || ''
+  const norm = categoryName.trim().toLowerCase()
+  let categorySlug = 'cleanser'
+
+  if (norm.includes('cleanser')) categorySlug = 'cleanser'
+  else if (norm.includes('toner') || norm.includes('mist')) categorySlug = 'toner-mist'
+  else if (norm.includes('serum') || norm.includes('essence')) categorySlug = 'serum-essence'
+  else if (norm.includes('moisturiser') || norm.includes('moisturizer')) categorySlug = 'moisturiser'
+  else if (norm.includes('sun') || norm.includes('spf')) categorySlug = 'sun-protection'
+  else if (norm.includes('mask')) categorySlug = 'face-mask'
+  else categorySlug = categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'cleanser'
 
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
-  const skinTypes = prod.skinTypes.map((t) => capitalize(t))
-  const skinConcerns = prod.skinConcerns.map((c) => capitalize(c))
+  const skinTypes = (prod.skinTypes || []).map((t) => capitalize(t))
+  const skinConcerns = (prod.skinConcerns || []).map((c) => capitalize(c))
 
   return {
     id: prod.id,
@@ -102,7 +145,7 @@ export function mapAdminToMock(prod: AdminProduct): MockProduct {
     name: prod.name,
     slug: prod.slug,
     image: imageUrl,
-    images: imageUrls.length > 0 ? imageUrls : [imageUrl],
+    images: finalImages,
     price: prod.price,
     salePrice: prod.salePrice || undefined,
     rating: prod.rating || 0,
@@ -127,6 +170,8 @@ export function mapAdminToMock(prod: AdminProduct): MockProduct {
 }
 
 export function getAdminProducts(): AdminProduct[] {
+  if (_cachedAdminProducts) return _cachedAdminProducts
+
   let products: AdminProduct[] = []
   if (typeof window === 'undefined') {
     products = adminProducts
@@ -145,7 +190,7 @@ export function getAdminProducts(): AdminProduct[] {
   }
 
   const reviews = getAdminReviews()
-  return products.map((prod) => {
+  const result = products.map((prod) => {
     const prodReviews = reviews.filter(
       (r) => r.product === prod.name && r.status === 'approved'
     )
@@ -160,9 +205,13 @@ export function getAdminProducts(): AdminProduct[] {
       reviewCount: count,
     }
   })
+
+  _cachedAdminProducts = result
+  return _cachedAdminProducts
 }
 
 export function saveAdminProduct(product: AdminProduct): AdminProduct[] {
+  clearStoreCaches()
   const current = getAdminProducts()
   const exists = current.some((p) => p.id === product.id)
   let updated: AdminProduct[]
@@ -181,6 +230,7 @@ export function saveAdminProduct(product: AdminProduct): AdminProduct[] {
 }
 
 export function deleteAdminProduct(id: string): AdminProduct[] {
+  clearStoreCaches()
   const current = getAdminProducts()
   const updated = current.filter((p) => p.id !== id)
   if (typeof window !== 'undefined') {
@@ -191,8 +241,10 @@ export function deleteAdminProduct(id: string): AdminProduct[] {
 }
 
 export function getMockProducts(): MockProduct[] {
+  if (_cachedMockProducts) return _cachedMockProducts
   const adminProds = getAdminProducts()
-  return adminProds.map(mapAdminToMock)
+  _cachedMockProducts = adminProds.map(mapAdminToMock)
+  return _cachedMockProducts
 }
 
 export function getAdminOrders(): AdminOrder[] {
@@ -444,6 +496,8 @@ export function savePromoPopupConfig(config: PromoPopupConfig): PromoPopupConfig
 const REVIEWS_KEY = 'cop_reviews'
 
 export function getAdminReviews(): AdminReview[] {
+  if (_cachedAdminReviews) return _cachedAdminReviews
+
   if (typeof window === 'undefined') {
     return adminReviews
   }
@@ -451,17 +505,21 @@ export function getAdminReviews(): AdminReview[] {
   const stored = localStorage.getItem(REVIEWS_KEY)
   if (!stored) {
     localStorage.setItem(REVIEWS_KEY, JSON.stringify(adminReviews))
-    return adminReviews
+    _cachedAdminReviews = adminReviews
+    return _cachedAdminReviews
   }
 
   try {
-    return JSON.parse(stored)
+    const parsed = JSON.parse(stored)
+    _cachedAdminReviews = parsed
+    return parsed
   } catch (e) {
     return adminReviews
   }
 }
 
 export function saveAdminReview(review: AdminReview): AdminReview[] {
+  clearStoreCaches()
   const current = getAdminReviews()
   const exists = current.some((r) => r.id === review.id)
   let updated: AdminReview[]
@@ -480,6 +538,7 @@ export function saveAdminReview(review: AdminReview): AdminReview[] {
 }
 
 export function deleteAdminReview(id: string): AdminReview[] {
+  clearStoreCaches()
   const current = getAdminReviews()
   const updated = current.filter((r) => r.id !== id)
   if (typeof window !== 'undefined') {
@@ -492,6 +551,8 @@ export function deleteAdminReview(id: string): AdminReview[] {
 const CATEGORIES_KEY = 'cop_categories'
 
 export function getAdminCategories(): AdminCategory[] {
+  if (_cachedAdminCategories) return _cachedAdminCategories
+
   let categories: AdminCategory[] = []
   if (typeof window === 'undefined') {
     categories = adminCategories
@@ -509,12 +570,19 @@ export function getAdminCategories(): AdminCategory[] {
     }
   }
 
-  const products = getAdminProducts()
-  return categories.map((cat) => {
+  const storedProds = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
+  let products: AdminProduct[] = []
+  if (storedProds) {
+    try { products = JSON.parse(storedProds) } catch (e) { products = adminProducts }
+  } else {
+    products = adminProducts
+  }
+
+  const result = categories.map((cat) => {
     const count = products.filter((p) => {
-      const pCat = p.category.toLowerCase().trim()
-      const catName = cat.name.toLowerCase().trim()
-      const catSlug = cat.slug.toLowerCase().trim()
+      const pCat = (p.category || '').toLowerCase().trim()
+      const catName = (cat.name || '').toLowerCase().trim()
+      const catSlug = (cat.slug || '').toLowerCase().trim()
       return pCat === catName || pCat === catSlug
     }).length
     return {
@@ -522,9 +590,13 @@ export function getAdminCategories(): AdminCategory[] {
       productCount: count,
     }
   })
+
+  _cachedAdminCategories = result
+  return _cachedAdminCategories
 }
 
 export function saveAdminCategory(category: AdminCategory): AdminCategory[] {
+  clearStoreCaches()
   const current = getAdminCategories()
   const exists = current.some((c) => c.id === category.id)
   let updated: AdminCategory[]
@@ -543,6 +615,7 @@ export function saveAdminCategory(category: AdminCategory): AdminCategory[] {
 }
 
 export function saveAdminCategoriesList(categories: AdminCategory[]): void {
+  clearStoreCaches()
   if (typeof window !== 'undefined') {
     localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories))
     syncToDb('categories', categories)

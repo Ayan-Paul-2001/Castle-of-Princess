@@ -9,20 +9,20 @@ import StoreData from '@/lib/db/models/store-data'
 const playfair = Playfair_Display({
   subsets: ['latin'],
   variable: '--font-playfair',
-  display: 'swap',
+  display: 'optional',
 })
 
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
-  display: 'swap',
+  display: 'optional',
 })
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
   variable: '--font-cormorant',
-  display: 'swap',
+  display: 'optional',
 })
 
 function getSafeSiteUrl(): URL {
@@ -38,26 +38,6 @@ function getSafeSiteUrl(): URL {
 }
 
 async function getFaviconUrl(): Promise<string> {
-  if (!process.env.MONGODB_URI) {
-    return '/icon.svg'
-  }
-  try {
-    const dbPromise = connectDB()
-    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500))
-    const conn = await Promise.race([dbPromise, timeoutPromise])
-    if (!conn) return '/icon.svg'
-
-    const faviconDoc = await StoreData.findOne({ key: 'favicon' }).lean()
-    if (faviconDoc?.data && typeof faviconDoc.data === 'string' && faviconDoc.data.trim()) {
-      return faviconDoc.data.trim()
-    }
-    const brandDoc = await StoreData.findOne({ key: 'brand_settings' }).lean()
-    if (brandDoc?.data?.favicon && typeof brandDoc.data.favicon === 'string' && brandDoc.data.favicon.trim()) {
-      return brandDoc.data.favicon.trim()
-    }
-  } catch (e) {
-    // Ignore DB error during static page generation / build
-  }
   return '/icon.svg'
 }
 
@@ -151,6 +131,13 @@ export default function RootLayout({
       className={`${playfair.variable} ${inter.variable} ${cormorant.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <link rel="preload" as="image" href="/hero-1.webp" type="image/webp" fetchPriority="high" />
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
+      </head>
       <body className="font-inter" suppressHydrationWarning>
         <Providers>
           {children}
@@ -176,3 +163,4 @@ export default function RootLayout({
     </html>
   )
 }
+

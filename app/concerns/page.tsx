@@ -127,6 +127,12 @@ export default function ConcernsPage() {
                   fill
                   className="object-cover opacity-75"
                   sizes="(max-width: 1024px) 100vw, 40vw"
+                  onError={(e) => {
+                    const target = e.currentTarget as HTMLImageElement
+                    if (target && !target.src.includes('cleanser.jpg')) {
+                      target.src = '/categories/cleanser.jpg'
+                    }
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-8">
@@ -171,6 +177,12 @@ export default function ConcernsPage() {
                     fill
                     className="object-cover transition-transform duration-700 hover:scale-105"
                     sizes="(max-width: 768px) 100vw, 33vw"
+                    onError={(e) => {
+                      const target = e.currentTarget as HTMLImageElement
+                      if (target && !target.src.includes('cleanser.jpg')) {
+                        target.src = '/categories/cleanser.jpg'
+                      }
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-transparent" />
                 </div>

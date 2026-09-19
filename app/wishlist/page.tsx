@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { useCartStore } from '@/stores/cart-store'
 import { useWishlistStore } from '@/stores/wishlist-store'
 import { formatPrice } from '@/lib/utils/cn'
+import { getOptimizedImageUrl } from '@/lib/utils/cloudinary-url'
 
 export default function WishlistPage() {
   const { items, clearWishlist, removeItem } = useWishlistStore()
@@ -108,11 +109,17 @@ export default function WishlistPage() {
                 <div className="grid gap-0 sm:grid-cols-[220px_1fr]">
                   <div className="relative min-h-[220px]">
                     <Image
-                      src={item.image}
+                      src={getOptimizedImageUrl(item.image)}
                       alt={item.name}
                       fill
                       className="object-cover"
                       sizes="(max-width: 640px) 100vw, 220px"
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement
+                        if (target && !target.src.includes('cleanser.jpg')) {
+                          target.src = '/categories/cleanser.jpg'
+                        }
+                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   </div>

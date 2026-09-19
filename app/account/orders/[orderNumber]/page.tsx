@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { ArrowRight, Package, Truck, CreditCard } from 'lucide-react'
@@ -82,10 +83,12 @@ export default async function AccountOrderDetailsPage({
                   >
                     <div className="flex items-center gap-4 min-w-0">
                       <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black/40">
-                        <img
+                        <Image
                           src={item.image}
                           alt={item.name}
-                          className="h-full w-full object-cover"
+                          fill
+                          sizes="56px"
+                          className="object-cover"
                         />
                       </div>
                       <div className="min-w-0">

@@ -86,6 +86,12 @@ export default function BrandsPage() {
                         fill
                         className="object-cover opacity-75"
                         sizes="(max-width: 1024px) 100vw, 40vw"
+                        onError={(e) => {
+                          const target = e.currentTarget as HTMLImageElement
+                          if (target && !target.src.includes('cleanser.jpg')) {
+                            target.src = '/categories/cleanser.jpg'
+                          }
+                        }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-transparent" />
                     </div>
@@ -164,6 +170,12 @@ export default function BrandsPage() {
                               fill
                               className="object-cover"
                               sizes="(max-width: 768px) 100vw, 30vw"
+                              onError={(e) => {
+                                const target = e.currentTarget as HTMLImageElement
+                                if (target && !target.src.includes('cleanser.jpg')) {
+                                  target.src = '/categories/cleanser.jpg'
+                                }
+                              }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
                           </div>

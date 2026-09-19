@@ -6,13 +6,7 @@ import { auth } from '@/lib/auth/config'
 export async function POST(request: Request) {
   try {
     const session = await auth()
-    
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Please sign in to place an order' },
-        { status: 401 }
-      )
-    }
+    const userId = session?.user?.id || 'guest'
 
     await connectDB()
 
@@ -79,7 +73,7 @@ export async function POST(request: Request) {
 
     // Create order
     const order = await Order.create({
-      user: session.user.id,
+      user: userId,
       products: products.map((item: any) => ({
         product: item.productId,
         name: item.name,

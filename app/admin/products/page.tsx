@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import {
@@ -23,6 +24,7 @@ import AdminPageHeader from '@/components/admin/admin-page-header'
 import { Button } from '@/components/ui/button'
 import { type AdminProduct } from '@/lib/admin-data'
 import { formatPrice } from '@/lib/utils/cn'
+import { getOptimizedImageUrl } from '@/lib/utils/cloudinary-url'
 import { productSchema } from '@/lib/utils/validators/schemas'
 import { getAdminProducts, saveAdminProduct, deleteAdminProduct, getAdminCategories, saveAdminCategory, type AdminCategory, getAdminBrands, saveAdminBrand } from '@/lib/products-store'
 
@@ -616,7 +618,9 @@ export default function AdminProductsPage() {
               ) : (
                 filteredProducts.map((product) => {
                   const libraryImage =
-                    product.images.find((image) => image.isPrimary) ?? product.images[0] ?? null
+                    Array.isArray(product.images)
+                      ? (product.images.find((image: any) => image?.isPrimary) ?? product.images[0] ?? (product as any).image ?? null)
+                      : ((product as any).image ?? null)
 
                   return (
                     <button
@@ -632,10 +636,18 @@ export default function AdminProductsPage() {
                       <div className="flex items-start gap-3">
                         <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black/40">
                           {libraryImage ? (
-                            <img
-                              src={libraryImage.url}
-                              alt={libraryImage.alt}
-                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            <Image
+                              src={getOptimizedImageUrl(libraryImage)}
+                              alt={typeof libraryImage === 'object' ? libraryImage.alt || product.name : product.name}
+                              fill
+                              unoptimized
+                              className="object-cover transition-transform duration-500 group-hover:scale-105"
+                              onError={(e) => {
+                                const target = e.currentTarget as HTMLImageElement
+                                if (target && !target.src.includes('cleanser.jpg')) {
+                                  target.src = '/categories/cleanser.jpg'
+                                }
+                              }}
                             />
                           ) : (
                             <div className="flex h-full items-center justify-center px-2 text-center text-[11px] text-gray-500">
@@ -720,12 +732,20 @@ export default function AdminProductsPage() {
                   <span>Showcase</span>
                   <span className="text-gold">Primary</span>
                 </div>
-                <div className="aspect-square bg-black/40">
+                <div className="relative aspect-square bg-black/40">
                   {primaryImage ? (
-                    <img
-                      src={primaryImage.url}
+                    <Image
+                      src={getOptimizedImageUrl(primaryImage.url)}
                       alt={primaryImage.alt}
-                      className="h-full w-full object-cover"
+                      fill
+                      unoptimized
+                      className="object-cover"
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement
+                        if (target && !target.src.includes('cleanser.jpg')) {
+                          target.src = '/categories/cleanser.jpg'
+                        }
+                      }}
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center px-6 text-center text-sm text-gray-500">
@@ -1025,10 +1045,12 @@ export default function AdminProductsPage() {
                     className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]"
                   >
                     <div className="relative aspect-[4/3] bg-black/40">
-                      <img
-                        src={image.url}
+                      <Image
+                        src={getOptimizedImageUrl(image.url)}
                         alt={image.alt}
-                        className="h-full w-full object-cover"
+                        fill
+                        unoptimized
+                        className="object-cover"
                       />
                       {image.isPrimary && (
                         <span className="absolute left-3 top-3 rounded-full bg-gold px-3 py-1 text-xs font-semibold text-black">

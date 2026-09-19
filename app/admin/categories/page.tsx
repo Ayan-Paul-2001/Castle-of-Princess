@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
 import toast from 'react-hot-toast'
 import { Plus, Pencil, X, Upload } from 'lucide-react'
@@ -209,10 +210,18 @@ export default function AdminCategoriesPage() {
               {form.image ? (
                 <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-3">
                   <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-black/40">
-                    <img
+                    <Image
                       src={form.image}
                       alt="Category Preview"
-                      className="h-full w-full object-cover"
+                      fill
+                      unoptimized
+                      className="object-cover"
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement
+                        if (target && !target.src.includes('cleanser.jpg')) {
+                          target.src = '/categories/cleanser.jpg'
+                        }
+                      }}
                     />
                   </div>
                   <div className="mt-3 flex gap-2">
@@ -285,10 +294,18 @@ export default function AdminCategoriesPage() {
                 <div className="flex items-center gap-4">
                   <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black/40 flex items-center justify-center">
                     {category.image ? (
-                      <img
+                      <Image
                         src={category.image}
                         alt={category.name}
-                        className="h-full w-full object-cover"
+                        fill
+                        unoptimized
+                        className="object-cover"
+                        onError={(e) => {
+                          const target = e.currentTarget as HTMLImageElement
+                          if (target && !target.src.includes('cleanser.jpg')) {
+                            target.src = '/categories/cleanser.jpg'
+                          }
+                        }}
                       />
                     ) : (
                       <span className="text-[10px] uppercase tracking-wider text-gray-600">No Image</span>

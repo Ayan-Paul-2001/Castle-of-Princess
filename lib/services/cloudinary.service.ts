@@ -66,12 +66,4 @@ export async function deleteImage(publicId: string): Promise<boolean> {
   }
 }
 
-export function getOptimizedImageUrl(url: string, width?: number, height?: number): string {
-  if (!url.includes('cloudinary.com')) return url
-
-  let transformation = 'q_auto:good,f_auto'
-  if (width) transformation += `,w_${width}`
-  if (height) transformation += `,h_${height}`
-
-  return url.replace('/upload/', `/upload/${transformation}/`)
-}
+export { getOptimizedImageUrl } from '@/lib/utils/cloudinary-url'

@@ -263,7 +263,14 @@ export default function AdminOrdersPage() {
               {filteredOrders.map((order) => (
                 <tr key={order.id} className="border-b border-white/5">
                   <td className="py-4">
-                    <p className="font-medium text-gold">{order.id}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-gold">{order.id}</p>
+                      {(order.email?.includes('guest') || order.customer?.includes('Guest') || (order as any).user === 'guest') && (
+                        <span className="bg-amber-500/20 text-amber-400 text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full border border-amber-500/30">
+                          Guest
+                        </span>
+                      )}
+                    </div>
                     <p className="mt-1 text-sm text-gray-500">{order.date}</p>
                   </td>
                   <td className="py-4">

@@ -28,7 +28,7 @@ export default auth(async function middleware(request) {
   }
 
   // Protected customer routes
-  if (pathname.startsWith('/account') || pathname.startsWith('/checkout')) {
+  if (pathname.startsWith('/account')) {
     if (!user) {
       const loginUrl = new URL('/auth/login', request.url)
       loginUrl.searchParams.set('callbackUrl', request.nextUrl.pathname)
@@ -43,7 +43,6 @@ export const config = {
   matcher: [
     '/admin/:path*',
     '/account/:path*',
-    '/checkout/:path*',
     '/api/admin/:path*',
   ],
 }

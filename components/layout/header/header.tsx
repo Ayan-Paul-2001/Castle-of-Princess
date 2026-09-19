@@ -10,6 +10,7 @@ import { useCartStore } from '@/stores/cart-store'
 import { useWishlistStore } from '@/stores/wishlist-store'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSession } from 'next-auth/react'
+import { getOptimizedImageUrl } from '@/lib/utils/cloudinary-url'
 
 const headerSearchCatalog = [
   {
@@ -92,7 +93,7 @@ export default function Header() {
   const navItems = useMemo(() => {
     const items = [...navigation]
     if (status === 'authenticated' && role === 'admin') {
-      items.unshift({ name: 'Dashboard', href: '/admin' })
+      items.push({ name: 'Dashboard', href: '/admin' })
     }
     return items
   }, [status, role])
@@ -245,13 +246,15 @@ export default function Header() {
                 )}
               </button>
 
-              {status !== 'authenticated' && (
-                <Link href="/auth/login">
-                  <Button variant="gold" size="sm">
-                    Login
-                  </Button>
-                </Link>
-              )}
+              <div className="flex items-center min-w-[70px] justify-end">
+                {status === 'unauthenticated' && (
+                  <Link href="/auth/login">
+                    <Button variant="gold" size="sm">
+                      Login
+                    </Button>
+                  </Link>
+                )}
+              </div>
             </div>
 
             {/* Mobile menu button */}
@@ -365,11 +368,17 @@ export default function Header() {
                     >
                       <span className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black/40">
                         <Image
-                          src={suggestion.image}
+                          src={getOptimizedImageUrl(suggestion.image)}
                           alt={suggestion.name}
                           fill
                           className="object-cover opacity-95"
                           sizes="40px"
+                          onError={(e) => {
+                            const target = e.currentTarget as HTMLImageElement
+                            if (target && !target.src.includes('cleanser.jpg')) {
+                              target.src = '/categories/cleanser.jpg'
+                            }
+                          }}
                         />
                       </span>
                       <span className="min-w-0 flex-1">

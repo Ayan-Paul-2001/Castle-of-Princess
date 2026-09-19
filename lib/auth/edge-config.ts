@@ -3,9 +3,10 @@ import type { NextAuthConfig } from 'next-auth'
 const authSecret =
   process.env.NEXTAUTH_SECRET ||
   process.env.AUTH_SECRET ||
-  (process.env.NODE_ENV === 'development' ? 'cop-dev-secret' : undefined)
+  'cop-default-fallback-secret-key-32-chars'
 
 export const authConfig: NextAuthConfig = {
+  trustHost: true,
   providers: [], // To be overridden/extended in the full config.ts
   callbacks: {
     async jwt({ token, user }) {
